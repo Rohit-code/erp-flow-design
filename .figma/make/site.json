@@ -1,0 +1,10 @@
+{
+  "description": "Streamline freight forwarding with a comprehensive booking management system for B2B operations, enhancing efficiency from inquiry to container release.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
