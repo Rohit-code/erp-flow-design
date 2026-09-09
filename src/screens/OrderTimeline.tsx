@@ -1,5 +1,7 @@
 import { Screen } from '../types'
 import { getOrder } from '../data/orders'
+import { BOOKING } from '../data/booking'
+import { useBooking } from '../state/BookingContext'
 import { PageHeader, cls, C, Badge, MonoRef, BadgeVariant } from '../components/ui'
 
 const roleColors: Record<string, string> = {
@@ -8,6 +10,8 @@ const roleColors: Record<string, string> = {
   'Trade': '#c4b5fd',
   'System': '#6b7280',
   'KYC Officer': '#86efac',
+  'Ops': '#fcd34d',
+  'Depot': '#fdba74',
 }
 
 const VARIANT_BADGE: Record<string, BadgeVariant> = {
@@ -18,14 +22,19 @@ const VARIANT_BADGE: Record<string, BadgeVariant> = {
 
 export default function OrderTimeline({ id, onNavigate }: { id: string; onNavigate: (s: Screen) => void }) {
   const record = getOrder(id)
-  const TIMELINE = record.timeline
+  const { booking } = useBooking()
+  // The booking this prototype walks writes its own history as you act on it —
+  // every entry below was appended by a real action, not hardcoded. The other
+  // orders are static examples.
+  const isLive = record.id === BOOKING.id
+  const TIMELINE = isLive ? booking.events : record.timeline
 
   return (
     <div className="max-w-2xl">
       <PageHeader
         breadcrumb={`Bookings / ${record.id}`}
         title="Order Timeline"
-        subtitle="Full audit trail — Inquiry to CRO"
+        subtitle={isLive ? `Live audit trail — ${booking.events.length} entries, appended as the booking moves` : 'Full audit trail — Inquiry to CRO'}
         actions={
           <div className="flex items-center gap-2">
             <Badge variant={VARIANT_BADGE[record.statusVariant]} label={record.statusLabel} />
@@ -60,8 +69,11 @@ export default function OrderTimeline({ id, onNavigate }: { id: string; onNaviga
           <div className="space-y-0">
             {TIMELINE.map((entry, i) => {
               const isLast = i === TIMELINE.length - 1
-              const isActive = entry.status === 'active'
-              const isPending = entry.status === 'pending'
+              // Static examples carry an explicit status; live events don't —
+              // the most recent one is what the booking is doing now.
+              const status = 'status' in entry ? entry.status : isLast ? 'active' : 'done'
+              const isActive = status === 'active'
+              const isPending = status === 'pending'
 
               return (
                 <div key={entry.id} className="flex gap-5 relative" style={{ paddingBottom: isLast ? 0 : 24 }}>

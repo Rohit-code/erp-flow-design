@@ -19,8 +19,8 @@ const GROUPS: Group[] = [
 
 const MEMBERS: Record<string, { name: string; email: string; initials: string; color: string }[]> = {
   g1: [{ name: 'Boni Rohit', email: 'bonirohit@gmail.com', initials: 'B', color: '#1e3a5f' }],
-  g2: [{ name: 'Rohit Kumar', email: 'rohit.kumar@apexlogistics.in', initials: 'R', color: '#3b1f6b' }],
-  g4: [{ name: 'Sunita R.', email: 'sunita.r@apexlogistics.in', initials: 'S', color: '#14532d' }],
+  g2: [{ name: 'Rohit Kumar', email: 'rohit.kumar@maxicon.in', initials: 'R', color: '#3b1f6b' }],
+  g4: [{ name: 'Sunita R.', email: 'sunita.r@maxicon.in', initials: 'S', color: '#14532d' }],
   g3: [], g5: [], g6: [],
 }
 

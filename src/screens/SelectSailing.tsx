@@ -1,51 +1,16 @@
 import { useState } from 'react'
-import { Screen } from '../types'
+import { Screen, Session } from '../types'
+import { SAILINGS } from '../data/sailings'
+import { useBooking } from '../state/BookingContext'
 import { cls, C, MonoRef, Icon } from '../components/ui'
 
-const SAILINGS = [
-  {
-    id: 'v1',
-    vessel: 'MSC Gulsun',
-    line: 'MSC',
-    voyage: '2411E',
-    etd: '22 Nov 2024',
-    eta: '14 Dec 2024',
-    transit: 22,
-    cutoff: '20 Nov 2024, 18:00',
-    spaces: 12,
-    highlight: true,
-  },
-  {
-    id: 'v2',
-    vessel: 'CMA CGM Marco Polo',
-    line: 'CMA CGM',
-    voyage: '2411S',
-    etd: '25 Nov 2024',
-    eta: '18 Dec 2024',
-    transit: 23,
-    cutoff: '23 Nov 2024, 12:00',
-    spaces: 8,
-    highlight: false,
-  },
-  {
-    id: 'v3',
-    vessel: 'Maersk Elba',
-    line: 'Maersk',
-    voyage: '411E',
-    etd: '29 Nov 2024',
-    eta: '21 Dec 2024',
-    transit: 22,
-    cutoff: '27 Nov 2024, 18:00',
-    spaces: 24,
-    highlight: false,
-  },
-]
 
-export default function SelectSailing({ onNavigate }: { onNavigate: (s: Screen) => void }) {
-  const [selected, setSelected] = useState<string | null>(null)
-  const [confirmed, setConfirmed] = useState(false)
+export default function SelectSailing({ session, onNavigate }: { session: Session; onNavigate: (s: Screen) => void }) {
+  const { booking, actions } = useBooking()
+  const [selected, setSelected] = useState<string | null>(booking.sailingId)
+  const confirmed = booking.sailingId !== null
 
-  const sailing = SAILINGS.find(s => s.id === selected)
+  const sailing = SAILINGS.find(s => s.id === (booking.sailingId ?? selected))
 
   return (
     <div>
@@ -66,8 +31,32 @@ export default function SelectSailing({ onNavigate }: { onNavigate: (s: Screen) 
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="#4ade80" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
             <div>
-              <div className="font-semibold" style={{ color: '#4ade80' }}>Sailing confirmed</div>
-              <div className="text-[12px]" style={{ color: '#86efac' }}>Your booking is fully confirmed. The CRO will be issued shortly.</div>
+              <div className="font-semibold" style={{ color: '#4ade80' }}>Sailing confirmed — your part is done</div>
+              <div className="text-[12px]" style={{ color: '#86efac' }}>
+                KYC, addresses and sailing are all complete. Your booking has gone to our operations team for acceptance.
+              </div>
+            </div>
+          </div>
+
+          {/* The three tasks the customer completes in one session — all must be
+              done before the booking can reach Ops. */}
+          <div style={{ background: '#0d2818', border: '1px solid #166534', borderRadius: 6 }} className="p-4 mb-4">
+            <div className="text-[10px] uppercase tracking-widest font-semibold mb-3" style={{ color: '#4ade8099' }}>
+              Booking Completion
+            </div>
+            <div className="space-y-2">
+              {[
+                booking.kycStatus === 'approved' ? 'KYC / KYV approved' : 'KYC / KYV submitted — under review',
+                `Billing address selected · ${booking.shippingAddressIds.length} shipping address${booking.shippingAddressIds.length === 1 ? '' : 'es'} selected`,
+                `Voyage selected — ${sailing.vessel} / ${sailing.voyage}`,
+              ].map(item => (
+                <div key={item} className="flex items-center gap-2.5">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+                    <path d="M2 6l3 3 5-6" stroke="#4ade80" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="text-[12px]" style={{ color: '#86efac' }}>{item}</span>
+                </div>
+              ))}
             </div>
           </div>
           <div style={{ background: '#0d2818', border: '1px solid #166534', borderRadius: 6 }} className="p-4 mb-4">
@@ -87,9 +76,19 @@ export default function SelectSailing({ onNavigate }: { onNavigate: (s: Screen) 
               ))}
             </div>
           </div>
-          <button onClick={() => onNavigate('cro-release')} className={cls.btnPrimary}>
-            View CRO →
-          </button>
+          <div
+            style={{ background: '#0d1d35', border: '1px solid #1e3a5f', borderRadius: 6 }}
+            className="flex items-start gap-3 px-4 py-3"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+              <circle cx="7" cy="7" r="5.5" stroke="#93c5fd" strokeWidth="1.2"/>
+              <path d="M7 4v3.5l2 1.5" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+            <div className="text-[12px]" style={{ color: '#93c5fd' }}>
+              <strong>Awaiting operations acceptance.</strong> Your Container Release Order is issued once Ops accepts —
+              you'll be notified, and it will appear under CRO in your portal. Nothing is released to the depot before then.
+            </div>
+          </div>
         </div>
       ) : (
         <>
@@ -165,7 +164,7 @@ export default function SelectSailing({ onNavigate }: { onNavigate: (s: Screen) 
           </div>
 
           <button
-            onClick={() => selected && setConfirmed(true)}
+            onClick={() => selected && actions.selectSailing(selected, session.name)}
             disabled={!selected}
             className={`${cls.btnPrimary} w-full justify-center py-3`}
             style={{ fontSize: 14, opacity: selected ? 1 : 0.4 }}

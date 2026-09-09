@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Screen, Role, Session } from '../types'
 import { getInquiry, InquiryRecord } from '../data/inquiries'
 import { Field, Input, Textarea, PageHeader, SectionCard, cls, C, Badge, MonoRef, Icon } from '../components/ui'
+import { assessMargin, verdictLabel, RATE_UNIT, FLOOR_MARGIN_PCT, FLOOR_MARGIN_IS_PROVISIONAL } from '../data/pricing'
 
 function confColor(pct: number): string {
   if (pct === 0) return '#f87171'
@@ -55,7 +56,7 @@ function draftQuoteMessage(record: InquiryRecord, proposedRate: number, senderNa
 
 Thanks for your patience. Here's our quote for ${record.pol} to ${record.pod}:
 
-USD ${proposedRate} / TEU all-in.
+USD ${proposedRate} / container all-in.
 
 Let me know if you'd like to proceed, or if you'd like to discuss further.
 
@@ -95,9 +96,11 @@ export default function InquiryDetail({
 
   const internalCost = tariff + slotRate + oceanFreight
   const hasAsk = record.customerAsk !== null
-  const marginDelta = hasAsk ? record.customerAsk! - internalCost : 0
-  const marginOk = hasAsk ? marginDelta >= 0 : true
-  const proposedBelowCost = hasAsk && proposedRate < internalCost
+  // The gate is the floor margin, not raw cost: a rate a dollar above cost is
+  // still below the minimum margin Sales is allowed to accept.
+  const ask = assessMargin(record.customerAsk ?? 0, internalCost)
+  const marginOk = hasAsk ? ask.salesMayAccept : true
+  const proposed = assessMargin(proposedRate, internalCost)
 
   return (
     <div className="max-w-3xl">
@@ -167,7 +170,7 @@ export default function InquiryDetail({
           <ConfField label="Commodity" value={record.commodity} confidence={record.confidence.commodity} />
           <ConfField
             label="Target Rate"
-            value={hasAsk ? `USD ${record.customerAsk} / TEU` : ''}
+            value={hasAsk ? `USD ${record.customerAsk} / ${RATE_UNIT}` : ''}
             confidence={record.confidence.targetRate}
           />
         </div>
@@ -252,19 +255,26 @@ export default function InquiryDetail({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-sm font-semibold" style={{ color: marginOk ? '#4ade80' : '#fbbf24' }}>
-                  Margin Check — {marginOk ? 'Within Sales Authority' : 'Requires Trade Approval'}
+                  {verdictLabel(ask.verdict)} — {marginOk ? 'Within Sales Authority' : 'Requires Trade Approval'}
                 </span>
                 <Badge variant={marginOk ? 'within-authority' : 'requires-trade'} />
               </div>
               <div className="text-[12px]" style={{ color: marginOk ? '#86efac' : '#fde68a' }}>
-                Customer asked <strong>USD {record.customerAsk} / TEU</strong> in their mail. Our combined cost — Tariff + Slot
-                {' '}Rate + Ocean Freight, below — comes to <strong>USD {internalCost} / TEU</strong>. That's{' '}
-                <strong>{marginOk ? `+USD ${marginDelta}` : `USD ${Math.abs(marginDelta)} short`}</strong>{' '}
-                {marginOk
-                  ? 'above cost — Sales may quote directly, and can ask for more than the customer offered.'
-                  : '— below our cost, this file must go to Trade before quoting.'
+                Customer asked <strong>USD {record.customerAsk} / {RATE_UNIT}</strong>. Our cost basis is{' '}
+                <strong>USD {internalCost}</strong>, so the floor margin — {Math.round(FLOOR_MARGIN_PCT * 100)}% over cost —
+                is <strong>USD {ask.floor}</strong>.{' '}
+                {ask.verdict === 'blue'
+                  ? `That's USD ${ask.rate - ask.floor} clear of the floor. Sales may quote directly, and can ask for more than the customer offered.`
+                  : ask.verdict === 'below-floor'
+                    ? `That's USD ${ask.shortfall} short of the floor — profitable, but under the minimum margin. Sales cannot accept it; this file goes to Trade.`
+                    : `That's below our cost, not just below the floor — USD ${internalCost - ask.rate} loss-making. Trade approval required before quoting.`
                 }
               </div>
+              {FLOOR_MARGIN_IS_PROVISIONAL && (
+                <div className="text-[11px] mt-1.5" style={{ color: marginOk ? '#4ade8099' : '#fbbf2499' }}>
+                  Floor margin is a provisional {Math.round(FLOOR_MARGIN_PCT * 100)}% placeholder — pending the ERP team's rule.
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -282,22 +292,22 @@ export default function InquiryDetail({
       {hasCost && (
         <SectionCard title="Our Cost Breakdown (Tariff + Slot Rate + Ocean Freight)">
           <div className="grid grid-cols-3 gap-4 mb-4">
-            <Field label="Tariff (USD / TEU)">
+            <Field label="Tariff (USD / container)">
               <Input type="number" value={tariff} disabled={!editable} mono
                 onChange={e => setTariff(parseInt(e.target.value) || 0)} />
             </Field>
-            <Field label="Slot Rate (USD / TEU)">
+            <Field label="Slot Rate (USD / container)">
               <Input type="number" value={slotRate} disabled={!editable} mono
                 onChange={e => setSlotRate(parseInt(e.target.value) || 0)} />
             </Field>
-            <Field label="Ocean Freight (USD / TEU)">
+            <Field label="Ocean Freight (USD / container)">
               <Input type="number" value={oceanFreight} disabled={!editable} mono
                 onChange={e => setOceanFreight(parseInt(e.target.value) || 0)} />
             </Field>
           </div>
           <div style={{ borderTop: `1px solid ${C.border}` }} className="pt-3 flex items-center justify-between">
             <span className={cls.sectionTitle} style={{ marginBottom: 0 }}>Internal Cost (our floor — never shown to the customer)</span>
-            <span className="font-mono text-[17px] font-semibold" style={{ color: C.text }}>USD {internalCost} / TEU</span>
+            <span className="font-mono text-[17px] font-semibold" style={{ color: C.text }}>USD {internalCost} / {RATE_UNIT}</span>
           </div>
         </SectionCard>
       )}
@@ -309,7 +319,7 @@ export default function InquiryDetail({
             <div>
               <div className={cls.sectionTitle}>Customer's Ask (from their mail)</div>
               <div className="font-mono text-[17px] font-medium" style={{ color: C.textMuted }}>
-                {hasAsk ? `USD ${record.customerAsk} / TEU` : 'Not stated'}
+                {hasAsk ? `USD ${record.customerAsk} / ${RATE_UNIT}` : 'Not stated'}
               </div>
             </div>
             <Field label="Proposed Rate — what Sales sends back">
@@ -323,9 +333,11 @@ export default function InquiryDetail({
               opens the negotiation on the Quotation screen.
             </p>
           )}
-          {proposedBelowCost && (
+          {!proposed.salesMayAccept && proposedRate > 0 && (
             <p className="text-[12px] mt-2 mb-3" style={{ color: '#fbbf24' }}>
-              This proposed rate is itself below our USD {internalCost} cost — that would also need Trade sign-off.
+              {proposed.verdict === 'below-floor'
+                ? `This proposed rate is USD ${proposed.shortfall} under the USD ${proposed.floor} floor — profitable, but it would still need Trade sign-off.`
+                : `This proposed rate is below our USD ${internalCost} cost — Trade sign-off required.`}
             </p>
           )}
 

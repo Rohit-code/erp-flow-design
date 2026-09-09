@@ -3,20 +3,20 @@ import { Screen, Session } from '../types'
 import { C } from './ui'
 
 const PORTAL_LINKS: { id: Screen; label: string }[] = [
-  { id: 'booking-form', label: 'Booking' },
   { id: 'quotation', label: 'Negotiation' },
   { id: 'kyc-form', label: 'KYC' },
-  { id: 'address-select', label: 'My Addresses' },
+  { id: 'address-select', label: 'Addresses' },
   { id: 'select-sailing', label: 'Sailing' },
   { id: 'shipping-instructions', label: 'Shipping Instructions' },
   { id: 'cro-release', label: 'CRO' },
+  { id: 'container-tracking', label: 'Tracking' },
   { id: 'bl-draft', label: 'BL Draft' },
   { id: 'invoice', label: 'Invoice' },
   { id: 'mbl-release', label: 'MBL' },
   { id: 'order-timeline', label: 'Timeline' },
 ]
 
-const PUBLIC_SCREENS: Screen[] = ['booking-form']
+const PUBLIC_SCREENS: Screen[] = ['register']
 
 export default function PortalShell({
   screen, session, onNavigate, onLogout, children

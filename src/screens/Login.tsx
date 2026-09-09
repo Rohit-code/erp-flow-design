@@ -1,6 +1,7 @@
 import React from 'react'
 import { Role } from '../types'
 import { DEMO_USERS, ROLE_LABEL, ROLE_DESCRIPTION } from '../auth'
+import { useBooking } from '../state/BookingContext'
 import { C } from '../components/ui'
 
 const ROLE_ORDER: Role[] = ['sales', 'trade', 'ops', 'depot', 'ou-admin', 'ho-admin', 'customer']
@@ -16,6 +17,11 @@ const ROLE_ICON: Record<Role, React.ReactNode> = {
 }
 
 export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
+  // One booking runs across every role, so the walkthrough is reset here rather
+  // than per-role — signing out is not the same as starting over.
+  const { booking, actions } = useBooking()
+  const progressed = booking.events.length > 2
+
   return (
     <div
       className="flex items-center justify-center h-full"
@@ -45,8 +51,22 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
           ))}
         </div>
 
-        <div className="text-center mt-6 text-[11px]" style={{ color: '#3d4456' }}>
-          Prototype login — click a role tile to sign in. No password required.
+        <div className="flex flex-col items-center gap-2.5 mt-6">
+          <div className="text-[11px]" style={{ color: '#3d4456' }}>
+            Prototype login — click a role tile to sign in. No password required.
+          </div>
+          {progressed && (
+            <button
+              onClick={actions.reset}
+              className="text-[11px]"
+              style={{
+                color: C.textMuted, background: '#1c1e26', border: `1px solid ${C.border}`,
+                borderRadius: 5, padding: '4px 10px',
+              }}
+            >
+              Reset booking — start the walkthrough again ({booking.events.length} steps recorded)
+            </button>
+          )}
         </div>
       </div>
     </div>

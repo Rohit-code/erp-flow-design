@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Screen } from '../types'
+import { Screen, Session } from '../types'
+import { useBooking } from '../state/BookingContext'
+import { getAddress } from '../data/addresses'
+import { BOOKING } from '../data/booking'
 import { Field, Input, Select, PageHeader, SectionCard, cls, C, Icon } from '../components/ui'
 
 type ContainerRow = {
@@ -21,15 +24,22 @@ const PACKAGE_UOMS = ['PKGS', 'CTNS', 'BOX', 'BAGS', 'PALLETS', 'DRUMS']
 
 const FREIGHT_PAYABLE_PORTS = ['Mumbai', 'Nhavasheva', 'Singapore', 'Dubai', 'Shanghai', 'Chennai', 'Kolkata']
 
-export default function ShippingInstructions({ onNavigate }: { onNavigate: (s: Screen) => void }) {
-  const [shipper, setShipper] = useState('Stellar Exports Pvt Ltd, Mumbai, India')
+export default function ShippingInstructions({ session, onNavigate }: { session: Session; onNavigate: (s: Screen) => void }) {
+  const { booking, actions, sailing } = useBooking()
+  // Derived from the dispatch addresses chosen at the address step — display only.
+  const dispatch = booking.shippingAddressIds.map(getAddress).filter(Boolean)
+  const shipper = dispatch.length
+    ? `${BOOKING.customer} — ${dispatch[0]!.line1}, ${dispatch[0]!.city} ${dispatch[0]!.pin}, ${dispatch[0]!.country}`
+    : BOOKING.customer
   const [consignee, setConsignee] = useState('Shanghai Huaxin Trading Co., Ltd, Pudong, Shanghai, China')
   const [notifyParty, setNotifyParty] = useState('Shanghai Huaxin Trading Co., Ltd, Pudong, Shanghai, China')
 
-  const [vessel, setVessel] = useState('MSC Gulsun / 2411E')
-  const [placeOfReceipt, setPlaceOfReceipt] = useState('')
-  const [pol, setPol] = useState('INNSA')
-  const [pod, setPod] = useState('CNSHA')
+  const [vessel, setVessel] = useState(sailing ? `${sailing.vessel} / ${sailing.voyage}` : '')
+  const [placeOfReceipt, setPlaceOfReceipt] = useState(
+    dispatch.length ? `${dispatch[0]!.city}, ${dispatch[0]!.state}, ${dispatch[0]!.country}` : '',
+  )
+  const [pol, setPol] = useState<string>(BOOKING.pol)
+  const [pod, setPod] = useState<string>(BOOKING.pod)
   const [placeOfDelivery, setPlaceOfDelivery] = useState('')
   const [freightStatus, setFreightStatus] = useState('Prepaid')
   const [freightPayableAt, setFreightPayableAt] = useState('Mumbai')
@@ -40,17 +50,19 @@ export default function ShippingInstructions({ onNavigate }: { onNavigate: (s: S
   const [cargoDescription, setCargoDescription] = useState('')
   const [marksAndNos, setMarksAndNos] = useState('')
 
-  const [containers, setContainers] = useState<ContainerRow[]>([
-    { number: 'MSCU3841290', seal: '', grossWeight: '', grossUom: 'KGS', netWeight: '', netUom: 'KGS', cbm: '', cbmUom: 'CBM', packages: '', packagesUom: 'PKGS' },
-    { number: 'MSCU4012876', seal: '', grossWeight: '', grossUom: 'KGS', netWeight: '', netUom: 'KGS', cbm: '', cbmUom: 'CBM', packages: '', packagesUom: 'PKGS' },
-  ])
+  const [containers, setContainers] = useState<ContainerRow[]>(
+    booking.containers.map(c => ({
+      number: c.number, seal: '', grossWeight: '', grossUom: 'KGS', netWeight: '', netUom: 'KGS',
+      cbm: '', cbmUom: 'CBM', packages: '', packagesUom: 'PKGS',
+    })),
+  )
 
-  const [submitted, setSubmitted] = useState(false)
+  const submitted = booking.siSubmitted
 
   const updateContainer = (i: number, field: keyof Omit<ContainerRow, 'number'>, value: string) =>
     setContainers(prev => prev.map((c, idx) => idx === i ? { ...c, [field]: value } : c))
 
-  const handleSubmit = () => setSubmitted(true)
+  const handleSubmit = () => actions.submitSI(session.name)
 
   return (
     <div className="max-w-3xl">
@@ -82,8 +94,19 @@ export default function ShippingInstructions({ onNavigate }: { onNavigate: (s: S
 
       <SectionCard title="Parties">
         <div className="space-y-4">
+          {/* Shipper is the customer's own KYC-verified entity and address. It is
+              not editable here — it must match what customs and the BL expect,
+              and changes go through Sales → Admin → KYC. */}
           <Field label="Shipper">
-            <Input value={shipper} onChange={e => setShipper(e.target.value)} required />
+            <div
+              style={{ background: '#1a1d24', border: `1px solid ${C.border}`, borderRadius: 4 }}
+              className="flex items-center justify-between gap-3 px-3 py-2"
+            >
+              <span className="text-sm" style={{ color: C.textSubtle }}>{shipper}</span>
+              <span className="text-[11px] flex-shrink-0" style={{ color: C.textMuted }}>
+                From your KYC address book · locked
+              </span>
+            </div>
           </Field>
           <Field label="Consignee">
             <Input value={consignee} onChange={e => setConsignee(e.target.value)} required />
@@ -162,8 +185,9 @@ export default function ShippingInstructions({ onNavigate }: { onNavigate: (s: S
           <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 960 }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-                {['Container No.', 'Seal No.', 'Gross Weight', 'UOM', 'Net Weight', 'UOM', 'CBM', 'UOM', 'No. of Packages', 'UOM'].map(h => (
-                  <th key={h} className={cls.tableHeader} style={{ textAlign: 'left' }}>{h}</th>
+                {/* 'UOM' repeats four times, so index is the only stable key here. */}
+                {['Container No.', 'Seal No.', 'Gross Weight', 'UOM', 'Net Weight', 'UOM', 'CBM', 'UOM', 'No. of Packages', 'UOM'].map((h, i) => (
+                  <th key={`${h}-${i}`} className={cls.tableHeader} style={{ textAlign: 'left' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -216,15 +240,23 @@ export default function ShippingInstructions({ onNavigate }: { onNavigate: (s: S
       </SectionCard>
 
       <SectionCard
-        title="Saved Addresses"
+        title="Where these addresses came from"
         action={
           <button className={cls.btnSecondary} style={{ fontSize: 12, padding: '4px 10px' }}>
-            <Icon.plus /> Save these addresses
+            <Icon.plus /> Save consignee for reuse
           </button>
         }
       >
-        <p className="text-[12px]" style={{ color: C.textMuted }}>
-          Addresses can be saved and reused for future bookings, like Amazon — Shipper/Consignee/Notify Party above were pre-filled from your last saved set.
+        <p className="text-[12px] leading-relaxed" style={{ color: C.textMuted }}>
+          <strong style={{ color: C.textSubtle }}>Shipper</strong> is locked. It comes from the dispatch address you chose
+          for this booking and must match your KYC-verified entity — to change it, ask Sales.
+          <br />
+          <strong style={{ color: C.textSubtle }}>Place of Receipt</strong> is pre-filled from the same address but stays
+          editable, since it may be an ICD or CFS rather than one of your own locations.
+          <br />
+          <strong style={{ color: C.textSubtle }}>Consignee</strong> and{' '}
+          <strong style={{ color: C.textSubtle }}>Notify Party</strong> are entered per shipment — your overseas buyer
+          changes deal to deal. Save one to reuse it on your next booking to the same consignee.
         </p>
       </SectionCard>
 

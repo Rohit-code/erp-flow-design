@@ -45,21 +45,21 @@ const SECTIONS: ServiceSection[] = [
   {
     label: 'IAM',
     items: [
-      { title: 'Dashboard',     desc: 'Open service',                                  screen: 'iam-dashboard', icon: si.grid },
-      { title: 'Users',         desc: 'Open service',                                  screen: 'iam-users',     icon: si.users },
-      { title: 'Service Seats', desc: 'Open service',                                                           icon: si.seat },
-      { title: 'Groups',        desc: 'Open service',                                  screen: 'iam-groups',    icon: si.group },
-      { title: 'Policies',      desc: 'Open service',                                  screen: 'iam-policies',  icon: si.shield },
-      { title: 'Permissions',   desc: 'Open service',                                  screen: 'iam-permissions', icon: si.lock },
-      { title: 'Audit Log',     desc: 'Open service',                                  screen: 'iam-audit',     icon: si.clipboard },
+      { title: 'Dashboard',     desc: 'Not built in this phase',                                  screen: 'iam-dashboard', icon: si.grid },
+      { title: 'Users',         desc: 'Not built in this phase',                                  screen: 'iam-users',     icon: si.users },
+      { title: 'Service Seats', desc: 'Not built in this phase',                                                           icon: si.seat },
+      { title: 'Groups',        desc: 'Not built in this phase',                                  screen: 'iam-groups',    icon: si.group },
+      { title: 'Policies',      desc: 'Not built in this phase',                                  screen: 'iam-policies',  icon: si.shield },
+      { title: 'Permissions',   desc: 'Not built in this phase',                                  screen: 'iam-permissions', icon: si.lock },
+      { title: 'Audit Log',     desc: 'Not built in this phase',                                  screen: 'iam-audit',     icon: si.clipboard },
     ],
   },
   {
     label: 'WORKSPACE',
     items: [
-      { title: 'Subscription',          desc: 'Open service',                          icon: si.card },
-      { title: 'Statement of Account',  desc: 'Open service',                          icon: si.scale },
-      { title: 'Agreements',            desc: 'Open service',                          icon: si.file },
+      { title: 'Subscription',          desc: 'Not built in this phase',                          icon: si.card },
+      { title: 'Statement of Account',  desc: 'Not built in this phase',                          icon: si.scale },
+      { title: 'Agreements',            desc: 'Not built in this phase',                          icon: si.file },
       { title: 'Dashboard',             desc: 'Role-based operating dashboard',        icon: si.chart },
       { title: 'AI Assistant',          desc: 'AI copilot for inquiries & recommendations', icon: si.sparkle },
     ],
@@ -88,7 +88,7 @@ const SECTIONS: ServiceSection[] = [
       { title: 'Invoice',              desc: 'Freight invoice & payment',                        screen: 'invoice',            icon: si.receipt },
       { title: 'MBL',                  desc: 'Master bill release — surrender or original',      screen: 'mbl-release',         icon: si.doc },
       { title: 'Master BL',            desc: 'Master bills of lading & consolidation',           icon: si.doc },
-      { title: 'Container Tracking',   desc: 'Container milestones, gate & depot events',         icon: si.box },
+      { title: 'Container Tracking',   desc: 'Container milestones, gate & depot events',         screen: 'container-tracking', icon: si.box },
     ],
   },
   {
@@ -101,27 +101,27 @@ const SECTIONS: ServiceSection[] = [
   {
     label: 'RATES & TARIFFS',
     items: [
-      { title: 'Tariff Codes',      desc: 'Open service', icon: si.hash },
-      { title: 'Exchange Rates',    desc: 'Open service', icon: si.pct },
-      { title: 'Detention',         desc: 'Open service', icon: si.clock },
-      { title: 'Ground Rent',       desc: 'Open service', icon: si.pin },
-      { title: 'Dead Freight',      desc: 'Open service', icon: si.ship },
-      { title: 'Margin Floor Rules', desc: 'Open service', icon: si.scale },
+      { title: 'Tariff Codes',      desc: 'Not built in this phase', icon: si.hash },
+      { title: 'Exchange Rates',    desc: 'Not built in this phase', icon: si.pct },
+      { title: 'Detention',         desc: 'Not built in this phase', icon: si.clock },
+      { title: 'Ground Rent',       desc: 'Not built in this phase', icon: si.pin },
+      { title: 'Dead Freight',      desc: 'Not built in this phase', icon: si.ship },
+      { title: 'Margin Floor Rules', desc: 'Not built in this phase', icon: si.scale },
     ],
   },
   {
     label: 'BILLING & FINANCE',
     items: [
-      { title: 'Invoices',          desc: 'Open service',                              icon: si.receipt },
-      { title: 'Supplier Invoices', desc: 'Open service',                              icon: si.receipt },
-      { title: 'Intercompany',      desc: 'Open service',                              icon: si.coins },
-      { title: 'Additional Charges', desc: 'Open service',                             icon: si.tag },
+      { title: 'Invoices',          desc: 'Not built in this phase',                              icon: si.receipt },
+      { title: 'Supplier Invoices', desc: 'Not built in this phase',                              icon: si.receipt },
+      { title: 'Intercompany',      desc: 'Not built in this phase',                              icon: si.coins },
+      { title: 'Additional Charges', desc: 'Not built in this phase',                             icon: si.tag },
       { title: 'Waivers',           desc: 'Detention waiver approvals',                icon: si.scale },
       { title: 'Claims',            desc: 'Cargo damage disputes & settlement',        icon: si.file },
-      { title: 'AR / AP Operations', desc: 'Open service',                             icon: si.coins },
-      { title: 'E-Invoice / IRN',   desc: 'Open service',                              icon: si.doc },
-      { title: 'Fixed Assets',      desc: 'Open service',                              icon: si.building },
-      { title: 'Location Onboarding', desc: 'Open service',                            icon: si.pin },
+      { title: 'AR / AP Operations', desc: 'Not built in this phase',                             icon: si.coins },
+      { title: 'E-Invoice / IRN',   desc: 'Not built in this phase',                              icon: si.doc },
+      { title: 'Fixed Assets',      desc: 'Not built in this phase',                              icon: si.building },
+      { title: 'Location Onboarding', desc: 'Not built in this phase',                            icon: si.pin },
     ],
   },
   {
@@ -134,25 +134,25 @@ const SECTIONS: ServiceSection[] = [
       { title: 'Commodities',    desc: 'Cargo goods, HS codes & hazardous', icon: si.tag },
       { title: 'Slot Operators', desc: 'Carriers, services & commitments', icon: si.group },
       { title: 'Codes',          desc: 'Code master, lookups & dropdowns', icon: si.hash },
-      { title: 'Tax Configuration', desc: 'Open service',                  icon: si.pct },
-      { title: 'Account Ledgers', desc: 'Open service',                    icon: si.receipt },
-      { title: 'Tax Posting Map', desc: 'Open service',                    icon: si.doc },
-      { title: 'Suppliers',      desc: 'Open service',                     icon: si.truck },
+      { title: 'Tax Configuration', desc: 'Not built in this phase',                  icon: si.pct },
+      { title: 'Account Ledgers', desc: 'Not built in this phase',                    icon: si.receipt },
+      { title: 'Tax Posting Map', desc: 'Not built in this phase',                    icon: si.doc },
+      { title: 'Suppliers',      desc: 'Not built in this phase',                     icon: si.truck },
     ],
   },
   {
     label: 'ORGANIZATION',
     items: [
       { title: 'Org Hierarchy',        desc: 'Corporate head offices & OU hierarchy', screen: 'org-hierarchy', icon: si.hierarchy },
-      { title: 'Corporate Groups',     desc: 'Open service',                          icon: si.group },
-      { title: 'Companies',            desc: 'Open service',                          icon: si.building },
+      { title: 'Corporate Groups',     desc: 'Not built in this phase',                          icon: si.group },
+      { title: 'Companies',            desc: 'Not built in this phase',                          icon: si.building },
       { title: 'Regions / Head Offices', desc: 'Head offices, regions & currency',   icon: si.building },
       { title: 'Branches / OUs',       desc: 'Operational units, branches & offices', icon: si.building },
-      { title: 'Departments',          desc: 'Open service',                          icon: si.group },
-      { title: 'Org Readiness',        desc: 'Open service',                          icon: si.star },
-      { title: 'Letterhead',           desc: 'Open service',                          icon: si.doc },
-      { title: 'Document Numbering',   desc: 'Open service',                          icon: si.hash },
-      { title: 'Booking Flow',         desc: 'Open service',                          icon: si.flow },
+      { title: 'Departments',          desc: 'Not built in this phase',                          icon: si.group },
+      { title: 'Org Readiness',        desc: 'Not built in this phase',                          icon: si.star },
+      { title: 'Letterhead',           desc: 'Not built in this phase',                          icon: si.doc },
+      { title: 'Document Numbering',   desc: 'Not built in this phase',                          icon: si.hash },
+      { title: 'Booking Flow',         desc: 'Not built in this phase',                          icon: si.flow },
     ],
   },
   {
@@ -165,11 +165,13 @@ const SECTIONS: ServiceSection[] = [
   },
 ]
 
+// Counted from the prototype's own data rather than hardcoded, so the tiles
+// can't claim numbers the screens behind them don't have.
 const STATS = [
-  { label: 'BOOKINGS',   value: '0',   color: C.text,          icon: si.doc },
-  { label: 'INQUIRIES',  value: '0',   color: C.text,          icon: si.file },
-  { label: 'CUSTOMERS',  value: '0',   color: '#4ade80',       icon: si.users },
-  { label: 'KYC TASKS',  value: '0',   color: '#fbbf24',       icon: si.shield },
+  { label: 'BOOKINGS',   value: String(ORDERS.length),                              color: C.text,    icon: si.doc },
+  { label: 'INQUIRIES',  value: String(INQUIRIES.length),                           color: C.text,    icon: si.file },
+  { label: 'CUSTOMERS',  value: String(new Set(INQUIRIES.map(i => i.customer)).size), color: '#4ade80', icon: si.users },
+  { label: 'KYC TASKS',  value: String(INQUIRIES.filter(i => !i.kycApproved).length + 1), color: '#fbbf24', icon: si.shield },
 ]
 
 // Which of the sections above a given role sees at all. Within a visible
@@ -194,8 +196,30 @@ export default function Home({ role, onNavigate }: { role: Role; onNavigate: (s:
       items: section.items.filter(item => !item.screen || ROLE_SCREENS[role].includes(item.screen)),
     }))
 
+  // Says plainly how much of the launcher is real, so nobody calibrates off a
+  // wall of cards and assumes the whole ERP is built.
+  const allItems = visibleSections.flatMap(s => s.items)
+  const builtCount = allItems.filter(i => i.screen).length
+
   return (
     <div>
+      {/* Scope */}
+      <div
+        style={{
+          background: '#0d1d35', border: '1px solid #1e3a5f', borderRadius: 8,
+          padding: '12px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+          <circle cx="7" cy="7" r="5.5" stroke="#93c5fd" strokeWidth="1.2"/>
+          <path d="M7 6.2v4M7 4.2v.6" stroke="#93c5fd" strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+        <span style={{ fontSize: 12, color: '#93c5fd' }}>
+          <strong>{builtCount} of {allItems.length} services are built in this prototype</strong> — the export booking
+          flow, end to end. Everything marked <em>Planned</em> is scope, not working software.
+        </span>
+      </div>
+
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
         {STATS.map(s => (
@@ -253,7 +277,7 @@ function ServiceCard({
       style={{
         textAlign: 'left', border: `1px solid ${hovered && onClick ? '#3d4456' : '#252830'}`,
         borderRadius: 7, padding: '12px 14px', background: '#15171d',
-        cursor: onClick ? 'pointer' : 'default', transition: 'border-color 0.12s',
+        cursor: onClick ? 'pointer' : 'default', transition: 'border-color 0.12s', opacity: onClick ? 1 : 0.62,
         display: 'flex', flexDirection: 'column', gap: 6,
       }}
     >
@@ -261,9 +285,21 @@ function ServiceCard({
         <div style={{ width: 28, height: 28, borderRadius: 5, background: '#1c1e26', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', flexShrink: 0 }}>
           {icon}
         </div>
+        {/* A card with no screen behind it says so, rather than looking built. */}
+        {!onClick && (
+          <span
+            style={{
+              fontSize: 9, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
+              color: '#5a6174', background: '#1a1d24', border: '1px solid #252830',
+              borderRadius: 3, padding: '2px 5px', flexShrink: 0,
+            }}
+          >
+            Planned
+          </span>
+        )}
       </div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 500, color: '#dde1ea', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: onClick ? '#dde1ea' : '#8a93a3', marginBottom: 2 }}>{title}</div>
         <div style={{ fontSize: 11.5, color: '#5a6174', lineHeight: 1.4 }}>{desc}</div>
       </div>
     </button>
@@ -272,3 +308,5 @@ function ServiceCard({
 
 // Need React import for useState in ServiceCard
 import React from 'react'
+import { INQUIRIES } from '../data/inquiries'
+import { ORDERS } from '../data/orders'

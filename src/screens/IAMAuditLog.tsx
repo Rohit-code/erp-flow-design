@@ -3,18 +3,18 @@ import { Screen } from '../types'
 import { cls, C } from '../components/ui'
 
 const ALL_ROWS = [
-  { ts: '2026-09-08 13:43:26', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'dashboard',    detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 13:43:02', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'bookings',     detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 13:43:02', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'inquiries',    detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 13:43:02', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'kyc-tasks',    detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 13:43:02', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'customers',    detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 13:43:02', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'subscription', detail: 'API R:0 · ERP_API_READ' },
-  { ts: '2026-09-08 09:52:14', actor: 'rohit.kumar@apexlogistics.in', action: 'WRITE', resource: 'inquiry:INQ-2024-0391', detail: 'Updated → Sent to Trade' },
-  { ts: '2026-09-08 09:41:00', actor: 'rohit.kumar@apexlogistics.in', action: 'CREATE', resource: 'inquiry:INQ-2024-0391', detail: 'New inquiry from nisha@stellarexports.in' },
-  { ts: '2026-09-07 15:04:11', actor: 'system@regnus.io',  action: 'CONFIRM', resource: 'booking:BKG-2024-00142', detail: 'Auto-confirmed — all prerequisites met' },
-  { ts: '2026-09-07 15:02:45', actor: 'sunita.r@apexlogistics.in', action: 'APPROVE', resource: 'kyc:KYC-2024-0214', detail: 'KYC approved for Stellar Exports Pvt Ltd' },
-  { ts: '2026-09-07 14:38:22', actor: 'nisha@stellarexports.in', action: 'ACCEPT', resource: 'quotation:QT-2024-0217', detail: 'Quote accepted — USD 562 / TEU' },
-  { ts: '2026-09-07 14:05:03', actor: 'priya.singh@apexlogistics.in', action: 'COUNTER', resource: 'quotation:QT-2024-0217', detail: 'Counter-offer USD 562 / TEU' },
+  { ts: '2024-11-14 16:15:22', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'dashboard',    detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 16:12:04', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'bookings',     detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 16:12:04', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'inquiries',    detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 16:12:04', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'kyc-tasks',    detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 16:12:04', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'customers',    detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 16:12:04', actor: 'bonirohit@gmail.com', action: 'READ',   resource: 'subscription', detail: 'API R:0 · ERP_API_READ' },
+  { ts: '2024-11-14 15:26:08', actor: 'arjun.mehta@maxicon.in', action: 'CONFIRM', resource: 'booking:BKG-2024-00142', detail: 'Accepted at the Ops gate — KYC, addresses, sailing, depot all verified' },
+  { ts: '2024-11-14 15:04:11', actor: 'sunita.r@maxicon.in', action: 'APPROVE', resource: 'kyc:KYC-2024-0214', detail: 'KYC approved for Stellar Exports Pvt Ltd' },
+  { ts: '2024-11-14 14:38:22', actor: 'nisha@stellarexports.in', action: 'ACCEPT', resource: 'quotation:QT-2024-0217', detail: 'Quote accepted — USD 485 / container' },
+  { ts: '2024-11-14 14:05:03', actor: 'priya.singh@maxicon.in', action: 'COUNTER', resource: 'quotation:QT-2024-0217', detail: 'Counter-offer USD 485 / container' },
+  { ts: '2024-11-14 11:31:07', actor: 'rohit.kumar@maxicon.in', action: 'WRITE', resource: 'inquiry:INQ-2024-0391', detail: 'Updated → Sent to Trade' },
+  { ts: '2024-11-14 09:41:00', actor: 'rohit.kumar@maxicon.in', action: 'CREATE', resource: 'inquiry:INQ-2024-0391', detail: 'New inquiry from nisha@stellarexports.in' },
 ]
 
 const actionColors: Record<string, { bg: string; color: string }> = {
@@ -50,7 +50,7 @@ export default function IAMAuditLog({ onNavigate }: { onNavigate: (s: Screen) =>
             onChange={e => setActorFilter(e.target.value)}
             style={{ width: 200 }}
           />
-          <input className={cls.input} type="date" defaultValue="2026-09-08" style={{ width: 150 }} />
+          <input className={cls.input} type="date" defaultValue="2024-11-14" style={{ width: 150 }} />
         </div>
       </div>
 

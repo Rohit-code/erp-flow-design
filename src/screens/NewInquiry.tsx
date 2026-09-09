@@ -155,7 +155,7 @@ export default function NewInquiry({ onNavigate }: { onNavigate: (s: Screen) => 
 
           <div className="pt-2" style={{ borderTop: `1px solid ${C.border}` }}>
             <span className="text-[12px]" style={{ color: C.textMuted }}>
-              Total: <strong style={{ color: C.textSubtle }}>{containers.reduce((s, c) => s + c.qty, 0)} TEU</strong>
+              Total: <strong style={{ color: C.textSubtle }}>{containers.reduce((s, c) => s + c.qty, 0)} containers</strong>
             </span>
           </div>
         </div>

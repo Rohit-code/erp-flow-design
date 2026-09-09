@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Screen } from '../types'
+import { Screen, Session } from '../types'
+import { useBooking } from '../state/BookingContext'
 import { PageHeader, cls, C, Badge, MonoRef, Icon } from '../components/ui'
 
 type KYCEntry = {
@@ -33,7 +34,11 @@ const DETAIL_FIELDS: DocField[] = [
   { label: 'IFSC', value: 'HDFC0001234', mono: true },
 ]
 
-export default function KYCQueue({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+/** The KYC record belonging to the booking this prototype walks. */
+const BOOKING_KYC_ID = 'KYC-2024-0214'
+
+export default function KYCQueue({ session, onNavigate }: { session: Session; onNavigate: (s: Screen) => void }) {
+  const { booking, actions } = useBooking()
   const [selected, setSelected] = useState<string | null>(null)
   const [action, setAction] = useState<'approve' | 'reject' | 'more' | null>(null)
   const [reason, setReason] = useState('')
@@ -168,7 +173,16 @@ export default function KYCQueue({ onNavigate }: { onNavigate: (s: Screen) => vo
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => { handleAction(); setActionDone(prev => ({ ...prev, [selected!]: 'approve' })); setSelected(null); onNavigate('booking-confirmed') }}
+                  // KYC approval clears one prerequisite — it does not confirm the
+                  // booking. The booking still has to pass the Ops acceptance gate.
+                  onClick={() => {
+                    handleAction()
+                    setActionDone(prev => ({ ...prev, [selected!]: 'approve' }))
+                    // Only this booking's KYC feeds the booking state.
+                    if (selected === BOOKING_KYC_ID) actions.approveKyc(session.name)
+                    setSelected(null)
+                    onNavigate('ops-accept')
+                  }}
                   className={cls.btnPrimary}
                 >
                   <Icon.check /> Approve KYC

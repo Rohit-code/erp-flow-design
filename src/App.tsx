@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Screen, Role, Session } from './types'
 import { DEMO_USERS, ROLE_LANDING, isScreenAllowed } from './auth'
+import { useBooking } from './state/BookingContext'
 import ERPShell from './components/ERPShell'
 import PortalShell from './components/PortalShell'
 import DepotShell from './components/DepotShell'
@@ -12,11 +13,12 @@ import InquiryList from './screens/InquiryList'
 import InquiryDetail from './screens/InquiryDetail'
 import QuotationList from './screens/QuotationList'
 import Quotation from './screens/Quotation'
-import BookingForm from './screens/BookingForm'
+import Register from './screens/Register'
 import AddressSelect from './screens/AddressSelect'
 import KYCQueue from './screens/KYCQueue'
 import KYCForm from './screens/KYCForm'
 import BookingList from './screens/BookingList'
+import OpsAccept from './screens/OpsAccept'
 import BookingConfirmed from './screens/BookingConfirmed'
 import SelectSailing from './screens/SelectSailing'
 import CRORelease from './screens/CRORelease'
@@ -33,22 +35,30 @@ import TradeQueue from './screens/TradeQueue'
 import OpsDepotSelect from './screens/OpsDepotSelect'
 import DepotRequirement from './screens/DepotRequirement'
 import DepotHandover from './screens/DepotHandover'
+import ContainerTracking from './screens/ContainerTracking'
 import ShippingInstructions from './screens/ShippingInstructions'
 import GateIn from './screens/GateIn'
+import LoadVessel from './screens/LoadVessel'
 import BLDraft from './screens/BLDraft'
 import Invoice from './screens/Invoice'
 import MBLRelease from './screens/MBLRelease'
 
 export default function App() {
+  const { booking } = useBooking()
   const [session, setSession] = useState<Session | null>(null)
   const [screen, setScreen] = useState<Screen>('home')
   const [selectedInquiryId, setSelectedInquiryId] = useState('INQ-2024-0391')
   const [selectedQuoteId, setSelectedQuoteId] = useState('QT-2024-0217')
   const [selectedOrderId, setSelectedOrderId] = useState('BKG-2024-00142')
 
+  // A customer who has already opened their magic link should land in the
+  // portal, not back on the registration page.
+  const landingFor = (role: Role): Screen =>
+    role === 'customer' && booking.customerRegistered ? 'quotation' : ROLE_LANDING[role]
+
   const handleLogin = (role: Role) => {
     setSession(DEMO_USERS[role])
-    setScreen(ROLE_LANDING[role])
+    setScreen(landingFor(role))
   }
 
   const handleLogout = () => {
@@ -64,8 +74,8 @@ export default function App() {
 
   // Guard: never render a screen outside the signed-in role's journey — fall
   // back to that role's landing screen instead.
-  const activeScreen: Screen = isScreenAllowed(role, screen) ? screen : ROLE_LANDING[role]
-  const navigate = (s: Screen) => setScreen(isScreenAllowed(role, s) ? s : ROLE_LANDING[role])
+  const activeScreen: Screen = isScreenAllowed(role, screen) ? screen : landingFor(role)
+  const navigate = (s: Screen) => setScreen(isScreenAllowed(role, s) ? s : landingFor(role))
   const openInquiry = (id: string) => { setSelectedInquiryId(id); navigate('inquiry-detail') }
   const openQuote = (id: string) => { setSelectedQuoteId(id); navigate('quotation') }
   const openOrder = (id: string) => { setSelectedOrderId(id); navigate('order-timeline') }
@@ -78,24 +88,27 @@ export default function App() {
       case 'inquiry-detail':       return <InquiryDetail key={selectedInquiryId} role={role} session={session} id={selectedInquiryId} onNavigate={navigate} onOpenQuote={openQuote} />
       case 'quotation-list':       return <QuotationList onOpen={openQuote} />
       case 'quotation':            return <Quotation key={selectedQuoteId} role={role} session={session} id={selectedQuoteId} onNavigate={navigate} />
-      case 'booking-form':         return <BookingForm onNavigate={navigate} />
-      case 'address-select':       return <AddressSelect onNavigate={navigate} />
-      case 'kyc-queue':            return <KYCQueue onNavigate={navigate} />
-      case 'kyc-form':             return <KYCForm onNavigate={navigate} />
-      case 'booking-list':         return <BookingList onNavigate={navigate} />
+      case 'register':             return <Register session={session} onNavigate={navigate} />
+      case 'address-select':       return <AddressSelect session={session} onNavigate={navigate} />
+      case 'kyc-queue':            return <KYCQueue session={session} onNavigate={navigate} />
+      case 'kyc-form':             return <KYCForm session={session} onNavigate={navigate} />
+      case 'booking-list':         return <BookingList onNavigate={navigate} onOpen={openOrder} />
+      case 'ops-accept':           return <OpsAccept session={session} onNavigate={navigate} />
       case 'booking-confirmed':    return <BookingConfirmed onNavigate={navigate} />
-      case 'select-sailing':       return <SelectSailing onNavigate={navigate} />
-      case 'ops-depot-select':     return <OpsDepotSelect onNavigate={navigate} />
-      case 'depot-requirement':    return <DepotRequirement onNavigate={navigate} />
-      case 'depot-handover':       return <DepotHandover onNavigate={navigate} />
+      case 'select-sailing':       return <SelectSailing session={session} onNavigate={navigate} />
+      case 'ops-depot-select':     return <OpsDepotSelect session={session} onNavigate={navigate} />
+      case 'depot-requirement':    return <DepotRequirement session={session} onNavigate={navigate} />
+      case 'depot-handover':       return <DepotHandover session={session} onNavigate={navigate} />
+      case 'container-tracking':   return <ContainerTracking role={role} onNavigate={navigate} />
       case 'cro-release':          return <CRORelease role={role} onNavigate={navigate} />
       case 'order-list':           return <OrderList onOpen={openOrder} />
       case 'order-timeline':       return <OrderTimeline id={selectedOrderId} onNavigate={navigate} />
-      case 'shipping-instructions':return <ShippingInstructions onNavigate={navigate} />
-      case 'gate-in':              return <GateIn onNavigate={navigate} />
-      case 'bl-draft':             return <BLDraft role={role} onNavigate={navigate} />
-      case 'invoice':              return <Invoice role={role} onNavigate={navigate} />
-      case 'mbl-release':          return <MBLRelease role={role} onNavigate={navigate} />
+      case 'shipping-instructions':return <ShippingInstructions session={session} onNavigate={navigate} />
+      case 'gate-in':              return <GateIn session={session} onNavigate={navigate} />
+      case 'load-vessel':          return <LoadVessel session={session} onNavigate={navigate} />
+      case 'bl-draft':             return <BLDraft role={role} session={session} onNavigate={navigate} />
+      case 'invoice':              return <Invoice role={role} session={session} onNavigate={navigate} />
+      case 'mbl-release':          return <MBLRelease role={role} session={session} onNavigate={navigate} />
       case 'trade-queue':          return <TradeQueue onOpen={openQuote} />
       case 'iam-dashboard':        return <IAMDashboard onNavigate={navigate} />
       case 'iam-users':            return <IAMUsers onNavigate={navigate} />

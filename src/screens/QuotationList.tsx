@@ -35,7 +35,7 @@ export default function QuotationList({ onOpen }: { onOpen: (id: string) => void
                   </td>
                   <td className={cls.tableCell}>
                     {latest ? (
-                      <span className="font-mono text-[12px]" style={{ color: C.accentDim }}>USD {latest.rate} / TEU</span>
+                      <span className="font-mono text-[12px]" style={{ color: C.accentDim }}>USD {latest.rate} / container</span>
                     ) : (
                       <span className="text-[12px]" style={{ color: C.textMuted }}>Not yet sent</span>
                     )}

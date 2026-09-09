@@ -2,27 +2,26 @@ import { useState } from 'react'
 import { Screen, Role, Session } from '../types'
 import { ROLE_LABEL } from '../auth'
 import { getQuotation, NegoEntry } from '../data/quotations'
+import { useBooking } from '../state/BookingContext'
+import { BOOKING } from '../data/booking'
+import { assessMargin, splitRate, RATE_UNIT, FLOOR_MARGIN_PCT, FLOOR_MARGIN_IS_PROVISIONAL } from '../data/pricing'
 import { PageHeader, SectionCard, cls, C, Badge, MonoRef, Icon, Input, Field, Textarea } from '../components/ui'
 
 // The action set is role-driven, per the decided rules:
 // Customer -> Counter, Accept. Sales -> Negotiate, Accept — but the moment the
-// rate on the table is below our cost, Sales loses both and gets exactly one
-// option: Send to Trade. Trade -> Decline, Negotiate, Accept (unconditional).
-function actionsFor(role: Role, belowCost: boolean): Array<'counter' | 'negotiate' | 'accept' | 'decline' | 'send-to-trade'> {
+// rate on the table falls below the FLOOR MARGIN (not merely below cost), Sales
+// loses both and gets exactly one option: Send to Trade. A rate a dollar above
+// cost is still Red. Trade -> Decline, Negotiate, Accept (unconditional).
+function actionsFor(role: Role, belowFloor: boolean): Array<'counter' | 'negotiate' | 'accept' | 'decline' | 'send-to-trade'> {
   if (role === 'trade') return ['decline', 'negotiate', 'accept']
   if (role === 'customer') return ['counter', 'accept']
-  if (role === 'sales') return belowCost ? ['send-to-trade'] : ['negotiate', 'accept']
+  if (role === 'sales') return belowFloor ? ['send-to-trade'] : ['negotiate', 'accept']
   return []
-}
-
-function splitRate(total: number): { ocean: number; baf: number; caf: number } {
-  const ocean = Math.round(total * 0.62)
-  const baf = Math.round(total * 0.2)
-  return { ocean, baf, caf: total - ocean - baf }
 }
 
 export default function Quotation({ role, session, id, onNavigate }: { role: Role; session: Session; id: string; onNavigate: (s: Screen) => void }) {
   const record = getQuotation(id)
+  const { actions: bookingActions } = useBooking()
   const [status, setStatus] = useState(record.status)
   const [history, setHistory] = useState<NegoEntry[]>(record.history)
   const [counterRate, setCounterRate] = useState('')
@@ -38,10 +37,12 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
   const [sentToTrade, setSentToTrade] = useState(false)
 
   const latestRate = history.length ? history[history.length - 1].rate : draftRate
-  const belowCost = latestRate < record.cost
+  // Re-checked on every new number, exactly as the flow requires.
+  const margin = assessMargin(latestRate, record.cost)
+  const belowFloor = !margin.salesMayAccept
   const ownedByTrade = history.some(entry => entry.role === ROLE_LABEL['trade'])
   const salesHandedOff = role === 'sales' && (ownedByTrade || sentToTrade)
-  const actions = salesHandedOff ? [] : actionsFor(role, belowCost)
+  const actions = salesHandedOff ? [] : actionsFor(role, belowFloor)
   // "Negotiate" is the term for opening/adjusting a rate before the customer has
   // pushed back. The moment the customer has made their own counter, everyone
   // still moving the rate — Sales, Trade — is now countering that counter, so
@@ -49,16 +50,19 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
   const hasCustomerCountered = history.some(entry => entry.role === ROLE_LABEL['customer'] && entry.type === 'counter')
   const counterVerb = (role === 'customer' || hasCustomerCountered) ? 'counter' : 'negotiate'
 
-  const addEntry = (type: NegoEntry['type'], rate: number, note: string) => {
+  const addEntry = (type: NegoEntry['type'], rate: number, note: string, internalNote?: string) => {
     setHistory(prev => [...prev, {
-      actor: session.name, role: ROLE_LABEL[role], type, rate, note, ts: 'Now'
+      actor: session.name, role: ROLE_LABEL[role], type, rate, note, internalNote, ts: 'Now'
     }])
   }
 
   const handleAccept = () => {
-    addEntry('accept', history[history.length - 1].rate, acceptNote.trim() || 'Accepted.')
+    const rate = history[history.length - 1].rate
+    addEntry('accept', rate, acceptNote.trim() || 'Accepted.')
     setStatus('accepted')
     setShowAccept(false)
+    // Only the booking this prototype walks feeds the shared booking state.
+    if (record.id === BOOKING.quotationId) bookingActions.agreeRate(rate, session.name, ROLE_LABEL[role])
   }
   const handleDecline = () => {
     addEntry('decline', history[history.length - 1].rate, declineNote.trim() || 'Declined.')
@@ -84,7 +88,12 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
     setNoteText('')
   }
   const handleSendToTrade = () => {
-    addEntry('note', latestRate, `Routed to Trade — USD ${latestRate} is below our USD ${record.cost} cost, Sales can't accept it.`)
+    addEntry(
+      'note',
+      latestRate,
+      'Passed to our trade desk for review.',
+      `Routed to Trade — USD ${latestRate} is under the USD ${margin.floor} floor margin, so Sales can't accept it.`,
+    )
     setSentToTrade(true)
   }
 
@@ -128,7 +137,7 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
           {role === 'sales' ? (
             <>
               <div className="mb-3">
-                <label className={cls.sectionTitle} style={{ color: C.textMuted }}>Rate (USD / TEU)</label>
+                <label className={cls.sectionTitle} style={{ color: C.textMuted }}>Rate (USD / container)</label>
                 <Input type="number" mono value={draftRate} onChange={e => setDraftRate(parseInt(e.target.value) || 0)} />
               </div>
               <div className="mb-3">
@@ -164,7 +173,7 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
                   className="font-mono text-[15px] font-medium"
                   style={{ color: i === 3 ? C.accentDim : C.text }}
                 >
-                  {r.value} <span className="text-[11px] font-normal" style={{ color: C.textMuted }}>/ TEU</span>
+                  {r.value} <span className="text-[11px] font-normal" style={{ color: C.textMuted }}>/ {RATE_UNIT}</span>
                 </div>
               </div>
             ))}
@@ -175,6 +184,54 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
             <span>Ref: <MonoRef>{record.id}</MonoRef></span>
           </div>
         </SectionCard>
+      )}
+
+      {/* Margin check — re-run on every new number in the thread. Internal only:
+          the customer must never see our cost basis or floor. */}
+      {role !== 'customer' && history.length > 0 && (
+        <div
+          style={{
+            background: margin.salesMayAccept ? C.green.bg : C.amber.bg,
+            border: `1px solid ${margin.salesMayAccept ? C.green.border : C.amber.border}`,
+            borderRadius: 6,
+          }}
+          className="px-4 py-3.5 mb-5"
+        >
+          <div className="flex items-center gap-2 mb-1.5">
+            <span
+              className="text-sm font-semibold"
+              style={{ color: margin.salesMayAccept ? C.green.text : C.amber.text }}
+            >
+              {margin.salesMayAccept ? 'BLUE' : 'RED'} — {margin.salesMayAccept ? 'Within Sales Authority' : 'Trade Authority Required'}
+            </span>
+            <Badge variant={margin.salesMayAccept ? 'within-authority' : 'requires-trade'} />
+            <span className="text-[11px]" style={{ color: C.textMuted }}>on the current number</span>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mt-2.5">
+            {[
+              { l: 'Cost basis', v: `USD ${margin.cost}` },
+              { l: `Floor (+${Math.round(FLOOR_MARGIN_PCT * 100)}%)`, v: `USD ${margin.floor}` },
+              { l: 'Rate on the table', v: `USD ${margin.rate}` },
+            ].map(f => (
+              <div key={f.l}>
+                <div className="text-[10px] uppercase tracking-widest font-medium mb-0.5" style={{ color: C.textMuted }}>{f.l}</div>
+                <div className="font-mono text-[14px] font-medium" style={{ color: C.text }}>{f.v}</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-[12px] mt-2.5" style={{ color: margin.salesMayAccept ? '#86efac' : '#fde68a' }}>
+            {margin.verdict === 'blue'
+              ? `USD ${margin.rate - margin.floor} clear of the floor — Sales may negotiate or accept.`
+              : margin.verdict === 'below-floor'
+                ? `USD ${margin.shortfall} short of the floor. Still above cost, but under the minimum margin — Sales may negotiate, only Trade may accept.`
+                : `Below cost by USD ${margin.cost - margin.rate} — loss-making. Sales may negotiate, only Trade may accept.`}
+          </div>
+          {FLOOR_MARGIN_IS_PROVISIONAL && (
+            <div className="text-[11px] mt-1.5" style={{ color: C.textMuted }}>
+              Floor margin is a provisional {Math.round(FLOOR_MARGIN_PCT * 100)}% placeholder — pending the ERP team's rule.
+            </div>
+          )}
+        </div>
       )}
 
       {/* Negotiation timeline */}
@@ -213,12 +270,24 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="font-mono text-[13px] font-medium" style={{ color: C.accentDim }}>USD {entry.rate} / TEU</span>
+                          <span className="font-mono text-[13px] font-medium" style={{ color: C.accentDim }}>USD {entry.rate} / {RATE_UNIT}</span>
                           <span className="text-[11px]" style={{ color: C.textMuted }}>{entry.ts}</span>
                         </div>
                       </div>
                       {entry.note && (
                         <p className="text-[12px] leading-relaxed" style={{ color: '#8a95a6' }}>{entry.note}</p>
+                      )}
+                      {/* Cost basis and floor margin are ours, not the customer's. */}
+                      {entry.internalNote && role !== 'customer' && (
+                        <div
+                          style={{ background: '#12141a', border: `1px dashed ${C.border}`, borderRadius: 4 }}
+                          className="mt-2 px-2.5 py-1.5"
+                        >
+                          <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                            Internal
+                          </span>
+                          <p className="text-[11.5px] leading-relaxed mt-0.5" style={{ color: '#7c8798' }}>{entry.internalNote}</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -232,7 +301,7 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
       {/* Counter / negotiate form */}
       {showCounter && (
         <SectionCard title={counterVerb === 'negotiate' ? 'Negotiate Rate' : 'Counter Offer'}>
-          <Field label="Rate (USD / TEU)" className="mb-3">
+          <Field label="Rate (USD / container)" className="mb-3">
             <Input
               type="number"
               mono
@@ -291,7 +360,7 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
           <div className="flex items-center gap-3 pt-2">
             <button onClick={handleSendToTrade} className={cls.btnAmber}>Send to Trade</button>
             <span className="text-[11px]" style={{ color: '#fbbf24' }}>
-              USD {latestRate} is below our USD {record.cost} cost — Sales can't Negotiate or Accept this one.
+              USD {latestRate} is under the USD {margin.floor} floor — Sales can't Negotiate or Accept this one.
             </span>
           </div>
         ) : actions.length > 0 ? (
@@ -341,10 +410,12 @@ export default function Quotation({ role, session, id, onNavigate }: { role: Rol
         >
           <div className="flex items-center gap-2">
             <Icon.check />
-            <span className="text-sm font-medium" style={{ color: C.green.text }}>Quote accepted at USD {latestRate} / TEU — Booking Form link will be emailed to customer</span>
+            <span className="text-sm font-medium" style={{ color: C.green.text }}>
+              Rate agreed at USD {latestRate} / {RATE_UNIT} — customer now completes KYC, addresses and sailing in the portal
+            </span>
           </div>
-          <button onClick={() => onNavigate('booking-form')} className={cls.btnPrimary} style={{ fontSize: 12, padding: '5px 10px' }}>
-            Preview Form →
+          <button onClick={() => onNavigate('kyc-form')} className={cls.btnPrimary} style={{ fontSize: 12, padding: '5px 10px' }}>
+            Continue to KYC →
           </button>
         </div>
       )}

@@ -10,12 +10,12 @@ type User = {
 }
 
 const USERS: User[] = [
-  { id: '1', initials: 'B', avatarColor: '#1e3a5f', email: 'bonirohit@gmail.com', name: 'Boni Rohit', tier: 'Admin', scope: 'Workspace-wide access level', active: true, lastLogin: '08 Sep 2026, 13:43' },
-  { id: '2', initials: 'N', avatarColor: '#14532d', email: 'nisha@stellarexports.in', name: 'Nisha Patel', tier: 'Standard', scope: 'Works across a regional office', active: true, lastLogin: '07 Sep 2026, 11:20' },
-  { id: '3', initials: 'R', avatarColor: '#3b1f6b', email: 'rohit.kumar@apexlogistics.in', name: 'Rohit Kumar', tier: 'Standard', scope: 'Workspace-wide access level', active: true, lastLogin: '08 Sep 2026, 09:52' },
-  { id: '4', initials: 'S', avatarColor: '#14532d', email: 'sunita.r@apexlogistics.in', name: 'Sunita R.', tier: 'Standard', scope: 'Assigned to an operational unit', active: true, lastLogin: '08 Sep 2026, 14:30' },
-  { id: '5', initials: 'P', avatarColor: '#78350f', email: 'priya.singh@apexlogistics.in', name: 'Priya Singh', tier: 'Standard', scope: 'Workspace-wide access level', active: false, lastLogin: '02 Sep 2026, 08:14' },
-  { id: '6', initials: 'A', avatarColor: '#1e3a5f', email: 'arjun.mehta@mehta-containers.in', name: 'Arjun Mehta', tier: 'Read-Only', scope: 'Works across a regional office', active: false, lastLogin: '05 Sep 2026, 16:45' },
+  { id: '1', initials: 'B', avatarColor: '#1e3a5f', email: 'bonirohit@gmail.com', name: 'Boni Rohit', tier: 'Admin', scope: 'Workspace-wide access level', active: true, lastLogin: '08 Nov 2024, 13:43' },
+  { id: '2', initials: 'N', avatarColor: '#14532d', email: 'nisha@stellarexports.in', name: 'Nisha Patel', tier: 'Standard', scope: 'Works across a regional office', active: true, lastLogin: '07 Nov 2024, 11:20' },
+  { id: '3', initials: 'R', avatarColor: '#3b1f6b', email: 'rohit.kumar@maxicon.in', name: 'Rohit Kumar', tier: 'Standard', scope: 'Workspace-wide access level', active: true, lastLogin: '08 Nov 2024, 09:52' },
+  { id: '4', initials: 'S', avatarColor: '#14532d', email: 'sunita.r@maxicon.in', name: 'Sunita R.', tier: 'Standard', scope: 'Assigned to an operational unit', active: true, lastLogin: '08 Nov 2024, 14:30' },
+  { id: '5', initials: 'P', avatarColor: '#78350f', email: 'priya.singh@maxicon.in', name: 'Priya Singh', tier: 'Standard', scope: 'Workspace-wide access level', active: false, lastLogin: '02 Nov 2024, 08:14' },
+  { id: '6', initials: 'A', avatarColor: '#1e3a5f', email: 'arjun.mehta@mehta-containers.in', name: 'Arjun Mehta', tier: 'Read-Only', scope: 'Works across a regional office', active: false, lastLogin: '05 Nov 2024, 16:45' },
 ]
 
 const tierColors: Record<string, { bg: string; text: string }> = {

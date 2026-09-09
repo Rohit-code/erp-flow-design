@@ -1,4 +1,6 @@
 import { ORDERS } from '../data/orders'
+import { BOOKING } from '../data/booking'
+import { useBooking } from '../state/BookingContext'
 import { PageHeader, cls, C, Badge, MonoRef } from '../components/ui'
 
 const VARIANT_BADGE: Record<string, 'active' | 'in-progress' | 'cancelled'> = {
@@ -8,6 +10,9 @@ const VARIANT_BADGE: Record<string, 'active' | 'in-progress' | 'cancelled'> = {
 }
 
 export default function OrderList({ onOpen }: { onOpen: (id: string) => void }) {
+  // This prototype's booking writes its own history, so its row reports live.
+  const { statusLabel, latestEvent, booking } = useBooking()
+
   return (
     <div className="max-w-4xl">
       <PageHeader
@@ -27,7 +32,8 @@ export default function OrderList({ onOpen }: { onOpen: (id: string) => void }) 
           </thead>
           <tbody>
             {ORDERS.map(row => {
-              const latest = row.timeline[row.timeline.length - 1]
+              const isLive = row.id === BOOKING.id
+              const latest = isLive && latestEvent ? latestEvent : row.timeline[row.timeline.length - 1]
               return (
                 <tr key={row.id} className={cls.tableRow} onClick={() => onOpen(row.id)}>
                   <td className={cls.tableCell}>
@@ -41,7 +47,10 @@ export default function OrderList({ onOpen }: { onOpen: (id: string) => void }) 
                   </td>
                   <td className={cls.tableCell} style={{ color: C.textMuted }}>{latest.label}</td>
                   <td className={cls.tableCell}>
-                    <Badge variant={VARIANT_BADGE[row.statusVariant]} label={row.statusLabel} />
+                    <Badge
+                      variant={isLive ? (booking.opsAccepted ? 'active' : 'in-progress') : VARIANT_BADGE[row.statusVariant]}
+                      label={isLive ? statusLabel : row.statusLabel}
+                    />
                   </td>
                   <td className={cls.tableCell}>
                     <button

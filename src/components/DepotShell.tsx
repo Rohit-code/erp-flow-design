@@ -5,6 +5,7 @@ import { C } from './ui'
 const DEPOT_LINKS: { id: Screen; label: string }[] = [
   { id: 'depot-requirement', label: 'Requirement Inbox' },
   { id: 'depot-handover', label: 'Container Handover' },
+  { id: 'container-tracking', label: 'Tracking' },
 ]
 
 export default function DepotShell({

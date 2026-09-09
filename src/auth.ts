@@ -41,7 +41,7 @@ export const ROLE_LANDING: Record<Role, Screen> = {
   depot: 'depot-requirement',
   'ou-admin': 'home',
   'ho-admin': 'home',
-  customer: 'booking-form',
+  customer: 'register',
 }
 
 // Which screens each role may navigate to. App.tsx and the shells consult this
@@ -50,15 +50,15 @@ export const ROLE_SCREENS: Record<Role, Screen[]> = {
   sales: ['home', 'new-inquiry', 'inquiry-list', 'inquiry-detail', 'quotation-list', 'quotation', 'kyc-queue', 'booking-list', 'booking-confirmed', 'order-list', 'order-timeline'],
   trade: ['home', 'trade-queue', 'inquiry-list', 'inquiry-detail', 'quotation', 'order-list', 'order-timeline'],
   ops: [
-    'home', 'inquiry-list', 'inquiry-detail', 'ops-depot-select', 'kyc-queue', 'booking-list', 'booking-confirmed',
-    'cro-release', 'gate-in', 'bl-draft', 'invoice', 'mbl-release', 'order-list', 'order-timeline',
+    'home', 'inquiry-list', 'inquiry-detail', 'ops-depot-select', 'kyc-queue', 'booking-list', 'ops-accept', 'booking-confirmed',
+    'cro-release', 'container-tracking', 'gate-in', 'load-vessel', 'bl-draft', 'invoice', 'mbl-release', 'order-list', 'order-timeline',
   ],
-  depot: ['depot-requirement', 'depot-handover'],
+  depot: ['depot-requirement', 'depot-handover', 'container-tracking'],
   'ou-admin': ['home', 'iam-dashboard', 'iam-users', 'iam-groups', 'iam-policies', 'iam-permissions', 'iam-audit'],
   'ho-admin': ['home', 'iam-dashboard', 'iam-users', 'iam-groups', 'iam-policies', 'iam-permissions', 'iam-audit', 'org-hierarchy'],
   customer: [
-    'booking-form', 'kyc-form', 'address-select', 'select-sailing', 'quotation',
-    'shipping-instructions', 'cro-release', 'bl-draft', 'invoice', 'mbl-release', 'order-timeline',
+    'register', 'kyc-form', 'address-select', 'select-sailing', 'quotation',
+    'shipping-instructions', 'cro-release', 'container-tracking', 'bl-draft', 'invoice', 'mbl-release', 'order-timeline',
   ],
 }
 

@@ -1,3 +1,4 @@
+import { floorRate, rateLabel } from '../data/pricing'
 import { PageHeader, cls, C, Badge, MonoRef } from '../components/ui'
 
 type TradeEntry = {
@@ -5,15 +6,15 @@ type TradeEntry = {
   customer: string
   pol: string
   pod: string
-  quotedRate: string
-  floorRate: string
+  quoted: number
+  cost: number
 }
 
 const QUEUE: TradeEntry[] = [
-  { ref: 'INQ-2024-0391', customer: 'Stellar Exports Pvt Ltd', pol: 'INNSA', pod: 'CNSHA', quotedRate: 'USD 460 / TEU', floorRate: 'USD 480 / TEU' },
-  { ref: 'INQ-2024-0388', customer: 'Apex Logistics Pvt Ltd', pol: 'INMUN', pod: 'AEJEA', quotedRate: 'USD 410 / TEU', floorRate: 'USD 435 / TEU' },
-  { ref: 'INQ-2024-0382', customer: 'Mehta Container Lines', pol: 'INNSA', pod: 'SGSIN', quotedRate: 'USD 375 / TEU', floorRate: 'USD 400 / TEU' },
-  { ref: 'INQ-2024-0379', customer: 'Global Cargo Solutions', pol: 'INBOM', pod: 'USNYC', quotedRate: 'USD 1180 / TEU', floorRate: 'USD 1220 / TEU' },
+  { ref: 'INQ-2024-0391', customer: 'Stellar Exports Pvt Ltd', pol: 'INNSA', pod: 'CNSHA', quoted: 460, cost: 440 },
+  { ref: 'INQ-2024-0388', customer: 'Apex Logistics Pvt Ltd', pol: 'INMUN', pod: 'AEJEA', quoted: 410, cost: 435 },
+  { ref: 'INQ-2024-0382', customer: 'Mehta Container Lines', pol: 'INNSA', pod: 'SGSIN', quoted: 375, cost: 400 },
+  { ref: 'INQ-2024-0379', customer: 'Global Cargo Solutions', pol: 'INBOM', pod: 'USNYC', quoted: 1180, cost: 1220 },
 ]
 
 export default function TradeQueue({ onOpen }: { onOpen: (id: string) => void }) {
@@ -47,9 +48,9 @@ export default function TradeQueue({ onOpen }: { onOpen: (id: string) => void })
                   <span className="font-mono text-[12px]" style={{ color: C.textMuted }}>{row.pod}</span>
                 </td>
                 <td className={cls.tableCell}>
-                  <span className="font-mono text-[12px]" style={{ color: '#f87171' }}>{row.quotedRate}</span>
+                  <span className="font-mono text-[12px]" style={{ color: '#f87171' }}>{rateLabel(row.quoted)}</span>
                   <span className="text-[12px]" style={{ color: C.textMuted }}> · floor </span>
-                  <span className="font-mono text-[12px]" style={{ color: C.textMuted }}>{row.floorRate}</span>
+                  <span className="font-mono text-[12px]" style={{ color: C.textMuted }}>{rateLabel(floorRate(row.cost))}</span>
                 </td>
                 <td className={cls.tableCell}>
                   <Badge variant="requires-trade" />

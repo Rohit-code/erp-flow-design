@@ -1,16 +1,16 @@
 import { useState } from 'react'
-import { Screen } from '../types'
+import { Screen, Session } from '../types'
+import { BOOKING } from '../data/booking'
+import { useBooking } from '../state/BookingContext'
 import { PageHeader, SectionCard, cls, C, Badge, MonoRef, Icon } from '../components/ui'
 
-const CONTAINERS = [
-  { number: 'MSCU3841290', type: '40ft HC' },
-  { number: 'MSCU4012876', type: '40ft HC' },
-]
 
-export default function GateIn({ onNavigate }: { onNavigate: (s: Screen) => void }) {
-  const [confirmed, setConfirmed] = useState<Record<string, boolean>>({})
+export default function GateIn({ session, onNavigate }: { session: Session; onNavigate: (s: Screen) => void }) {
+  const { booking, actions, sailing } = useBooking()
 
-  const allConfirmed = CONTAINERS.every(c => confirmed[c.number])
+  // Only containers the depot has actually handed over can be gated in.
+  const CONTAINERS = booking.containers.map(c => ({ number: c.number, type: BOOKING.containerType, gatedIn: c.gatedIn }))
+  const allConfirmed = CONTAINERS.length > 0 && CONTAINERS.every(c => c.gatedIn)
 
   return (
     <div className="max-w-2xl">
@@ -23,7 +23,7 @@ export default function GateIn({ onNavigate }: { onNavigate: (s: Screen) => void
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <div className="text-[10px] uppercase tracking-widest font-medium mb-0.5" style={{ color: C.textMuted }}>Vessel ETD</div>
-            <span className="text-[13px]" style={{ color: C.text }}>22 Nov 2024</span>
+            <span className="text-[13px]" style={{ color: C.text }}>{sailing?.etd ?? '—'}</span>
           </div>
           <div>
             <div className="text-[10px] uppercase tracking-widest font-medium mb-0.5" style={{ color: C.textMuted }}>Gate-In Cutoff</div>
@@ -57,12 +57,12 @@ export default function GateIn({ onNavigate }: { onNavigate: (s: Screen) => void
                   <td className={cls.tableCell}><MonoRef>{c.number}</MonoRef></td>
                   <td className={cls.tableCell}>{c.type}</td>
                   <td className={cls.tableCell}>
-                    <Badge variant={confirmed[c.number] ? 'confirmed' : 'pending'} label={confirmed[c.number] ? 'Confirmed' : 'Pending'} />
+                    <Badge variant={c.gatedIn ? 'confirmed' : 'pending'} label={c.gatedIn ? 'Confirmed' : 'Pending'} />
                   </td>
                   <td className={cls.tableCell} style={{ textAlign: 'right' }}>
-                    {!confirmed[c.number] && (
+                    {!c.gatedIn && (
                       <button
-                        onClick={() => setConfirmed(prev => ({ ...prev, [c.number]: true }))}
+                        onClick={() => actions.confirmGateIn(c.number, session.name)}
                         className={cls.btnSecondary}
                         style={{ fontSize: 12, padding: '4px 10px' }}
                       >
@@ -79,12 +79,12 @@ export default function GateIn({ onNavigate }: { onNavigate: (s: Screen) => void
 
       <div className="flex justify-end pt-2">
         <button
-          onClick={() => onNavigate('bl-draft')}
+          onClick={() => onNavigate('load-vessel')}
           disabled={!allConfirmed}
           className={cls.btnPrimary}
           style={!allConfirmed ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
         >
-          Continue to BL Draft →
+          Continue to Load Vessel →
         </button>
       </div>
     </div>

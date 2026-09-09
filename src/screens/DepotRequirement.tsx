@@ -1,70 +1,104 @@
-import { useState } from 'react'
-import { Screen } from '../types'
+import { Screen, Session } from '../types'
+import { DEPOTS } from '../data/depots'
+import { BOOKING } from '../data/booking'
+import { useBooking } from '../state/BookingContext'
 import { PageHeader, SectionCard, cls, C, Badge, MonoRef } from '../components/ui'
 
-type ReplyState = 'pending' | 'yes' | 'no'
+// The depot's side of the pre-check. In the real system each depot sees only
+// its own inbox; here the signed-in depot user answers on behalf of whichever
+// depot row they are looking at, so both the auto-pick and the manual-choice
+// paths can be walked without three separate logins.
 
-const REQUESTS = [
-  { bookingRef: 'BKG-2024-00142', containers: '2 × 40ft High Cube', depotName: 'JNPT CFS Gate 3' },
-  { bookingRef: 'BKG-2024-00158', containers: '1 × 20ft Standard', depotName: 'JNPT CFS Gate 1' },
-]
+export default function DepotRequirement({ session, onNavigate }: { session: Session; onNavigate: (s: Screen) => void }) {
+  const { booking, actions } = useBooking()
 
-export default function DepotRequirement({ onNavigate }: { onNavigate: (s: Screen) => void }) {
-  const [replies, setReplies] = useState<Record<string, ReplyState>>({})
+  if (!booking.requirementSent) {
+    return (
+      <div className="max-w-2xl">
+        <PageHeader title="Requirement Inbox" subtitle="Booking requests asking whether this depot has the required containers" />
+        <SectionCard>
+          <p className="text-[13px]" style={{ color: C.textMuted }}>
+            Nothing waiting. Requirements appear here once Ops sends one out for a booking — they go to every candidate
+            depot at the port at the same time.
+          </p>
+        </SectionCard>
+      </div>
+    )
+  }
+
+  const answered = DEPOTS.filter(d => booking.depotReplies[d.id]).length
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <PageHeader
         title="Requirement Inbox"
         subtitle="Booking requests asking whether this depot has the required containers"
+        actions={<Badge variant={answered === DEPOTS.length ? 'approved' : 'pending'} label={`${answered} of ${DEPOTS.length} answered`} />}
       />
 
-      {REQUESTS.map(req => {
-        const reply = replies[req.bookingRef] ?? 'pending'
+      {DEPOTS.map(depot => {
+        const reply = booking.depotReplies[depot.id]
+        const assigned = booking.depotId === depot.id
         return (
-          <SectionCard key={req.bookingRef}>
+          <SectionCard key={depot.id}>
             <div className="text-[11px] uppercase tracking-widest font-medium mb-2" style={{ color: C.textMuted }}>
-              This depot: {req.depotName}
+              {depot.name}
             </div>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-sm mb-1" style={{ color: C.text }}>
-                  <MonoRef>{req.bookingRef}</MonoRef>
+                  <MonoRef>{BOOKING.id}</MonoRef>
                 </div>
-                <div className="text-[13px]" style={{ color: C.textSubtle }}>{req.containers}</div>
+                <div className="text-[13px]" style={{ color: C.textSubtle }}>{BOOKING.equipment}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+                  {BOOKING.pol} → {BOOKING.pod} · {BOOKING.customer}
+                </div>
               </div>
-              {reply !== 'pending' && (
-                <Badge
-                  variant={reply === 'yes' ? 'approved' : 'inactive'}
-                  label={reply === 'yes' ? 'Replied: Yes' : 'Replied: No'}
-                />
-              )}
+              <div className="flex items-center gap-2">
+                {reply && (
+                  <Badge
+                    variant={reply === 'yes' ? 'approved' : 'inactive'}
+                    label={reply === 'yes' ? 'Replied: Yes' : 'Replied: No'}
+                  />
+                )}
+                {assigned && <Badge variant="confirmed" label="Assigned" />}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                className={cls.btnPrimary}
-                disabled={reply !== 'pending'}
-                style={reply !== 'pending' ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
-                onClick={() => setReplies(r => ({ ...r, [req.bookingRef]: 'yes' }))}
-              >
-                Yes, we have it
-              </button>
-              <button
-                className={cls.btnSecondary}
-                disabled={reply !== 'pending'}
-                style={reply !== 'pending' ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
-                onClick={() => setReplies(r => ({ ...r, [req.bookingRef]: 'no' }))}
-              >
-                No
-              </button>
-            </div>
+            {!reply ? (
+              <div className="flex gap-2">
+                <button className={cls.btnPrimary} onClick={() => actions.replyDepot(depot.id, 'yes', session.name)}>
+                  Yes, we have it
+                </button>
+                <button className={cls.btnSecondary} onClick={() => actions.replyDepot(depot.id, 'no', session.name)}>
+                  No
+                </button>
+              </div>
+            ) : (
+              <p className="text-[12px]" style={{ color: C.textMuted }}>
+                {assigned
+                  ? 'Ops assigned this booking to you — the CRO will carry your address, and the customer will bring a copy to your gate.'
+                  : reply === 'yes'
+                    ? 'Reply sent. If you are the only depot that confirmed, you are auto-picked; otherwise Ops chooses.'
+                    : 'Reply sent — this booking will go to another depot.'}
+              </p>
+            )}
           </SectionCard>
         )
       })}
 
-      <p className="text-[12px]" style={{ color: C.textMuted }}>
-        Your reply feeds Ops's depot selection — if you're the only depot that confirms, you're auto-picked.
-      </p>
+      {booking.depotId && (
+        <div
+          style={{ background: C.green.bg, border: `1px solid ${C.green.border}`, borderRadius: 6 }}
+          className="flex items-center justify-between px-4 py-3"
+        >
+          <span className="text-[13px]" style={{ color: C.green.text }}>
+            Booking assigned to {DEPOTS.find(d => d.id === booking.depotId)?.name}.
+          </span>
+          <button onClick={() => onNavigate('depot-handover')} className={cls.btnPrimary} style={{ fontSize: 12, padding: '5px 10px' }}>
+            Container Handover →
+          </button>
+        </div>
+      )}
     </div>
   )
 }
