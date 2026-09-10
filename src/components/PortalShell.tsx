@@ -14,6 +14,7 @@ const PORTAL_LINKS: { id: Screen; label: string }[] = [
   { id: 'invoice', label: 'Invoice' },
   { id: 'mbl-release', label: 'MBL' },
   { id: 'order-timeline', label: 'Timeline' },
+  { id: 'order-list', label: 'Order History' },
 ]
 
 const PUBLIC_SCREENS: Screen[] = ['register']

@@ -6,6 +6,7 @@ const DEPOT_LINKS: { id: Screen; label: string }[] = [
   { id: 'depot-requirement', label: 'Requirement Inbox' },
   { id: 'depot-handover', label: 'Container Handover' },
   { id: 'container-tracking', label: 'Tracking' },
+  { id: 'depot-queue', label: 'Case Queue' },
 ]
 
 export default function DepotShell({
@@ -43,21 +44,24 @@ export default function DepotShell({
           </span>
         </div>
 
-        {DEPOT_LINKS.map(link => (
-          <button
-            key={link.id}
-            onClick={() => onNavigate(link.id)}
-            className="text-[13px] transition-colors"
-            style={{
-              color: screen === link.id ? C.accentDim : C.textMuted,
-              fontWeight: screen === link.id ? 500 : 400,
-              borderBottom: screen === link.id ? `2px solid ${C.accent}` : '2px solid transparent',
-              paddingBottom: 2,
-            }}
-          >
-            {link.label}
-          </button>
-        ))}
+        {DEPOT_LINKS.map(link => {
+          const active = screen === link.id || (link.id === 'depot-queue' && screen === 'depot-case-detail')
+          return (
+            <button
+              key={link.id}
+              onClick={() => onNavigate(link.id)}
+              className="text-[13px] transition-colors"
+              style={{
+                color: active ? C.accentDim : C.textMuted,
+                fontWeight: active ? 500 : 400,
+                borderBottom: active ? `2px solid ${C.accent}` : '2px solid transparent',
+                paddingBottom: 2,
+              }}
+            >
+              {link.label}
+            </button>
+          )
+        })}
 
         <div className="flex-1" />
 

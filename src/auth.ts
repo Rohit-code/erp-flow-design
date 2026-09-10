@@ -53,12 +53,13 @@ export const ROLE_SCREENS: Record<Role, Screen[]> = {
     'home', 'inquiry-list', 'inquiry-detail', 'ops-depot-select', 'kyc-queue', 'booking-list', 'ops-accept', 'booking-confirmed',
     'cro-release', 'container-tracking', 'gate-in', 'load-vessel', 'bl-draft', 'invoice', 'mbl-release', 'order-list', 'order-timeline',
   ],
-  depot: ['depot-requirement', 'depot-handover', 'container-tracking'],
+  depot: ['depot-requirement', 'depot-handover', 'container-tracking', 'depot-queue', 'depot-case-detail'],
   'ou-admin': ['home', 'iam-dashboard', 'iam-users', 'iam-groups', 'iam-policies', 'iam-permissions', 'iam-audit'],
   'ho-admin': ['home', 'iam-dashboard', 'iam-users', 'iam-groups', 'iam-policies', 'iam-permissions', 'iam-audit', 'org-hierarchy'],
   customer: [
     'register', 'kyc-form', 'address-select', 'select-sailing', 'quotation',
-    'shipping-instructions', 'cro-release', 'container-tracking', 'bl-draft', 'invoice', 'mbl-release', 'order-timeline',
+    'shipping-instructions', 'cro-release', 'container-tracking', 'bl-draft', 'invoice', 'mbl-release',
+    'order-list', 'order-timeline',
   ],
 }
 

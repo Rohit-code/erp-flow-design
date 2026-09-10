@@ -1,8 +1,9 @@
 import { Screen } from '../types'
 import { getOrder } from '../data/orders'
 import { BOOKING } from '../data/booking'
+import { DEPOTS, getDepot } from '../data/depots'
 import { useBooking } from '../state/BookingContext'
-import { PageHeader, cls, C, Badge, MonoRef, BadgeVariant } from '../components/ui'
+import { PageHeader, SectionCard, cls, C, Badge, MonoRef, BadgeVariant } from '../components/ui'
 
 const roleColors: Record<string, string> = {
   'Customer': '#93c5fd',
@@ -28,6 +29,41 @@ export default function OrderTimeline({ id, onNavigate }: { id: string; onNaviga
   // orders are static examples.
   const isLive = record.id === BOOKING.id
   const TIMELINE = isLive ? booking.events : record.timeline
+
+  // Everything below the booking bar is read from the live booking for the
+  // one case the prototype walks interactively, and from the case's own
+  // snapshot for every other one — so the dossier can never disagree with
+  // whichever source actually holds the truth for this booking.
+  const s = record.snapshot
+  const foodGrade = isLive ? booking.foodGrade : s.foodGrade
+  const requirementSent = isLive ? booking.requirementSent : s.requirementSent
+  const depotReplies = isLive ? booking.depotReplies : s.depotReplies
+  const depotId = isLive ? booking.depotId : s.depotId
+  const croId = isLive ? (booking.croHistory[booking.croHistory.length - 1]?.number ?? null) : s.croId
+  const containers = isLive ? booking.containers : s.containers
+  const containersExpected = isLive ? [...BOOKING.containers] : s.containersExpected
+  const kycStatus = isLive ? booking.kycStatus : s.kycStatus
+  const kycRejectionReason = isLive ? booking.kycRejectionReason : s.kycRejectionReason
+  const blStatus = isLive ? booking.blStatus : s.blStatus
+  const blChangeNote = isLive ? booking.blChangeNote : s.blChangeNote
+  const mblType = isLive ? booking.mblType : s.mblType
+  const invoiceReleased = isLive ? booking.invoiceReleased : s.invoiceReleased
+  const hasStandingCredit = isLive ? booking.hasStandingCredit : s.hasStandingCredit
+  const paymentStatus = isLive ? booking.paymentStatus : s.paymentStatus
+  const mblReleased = isLive ? booking.mblReleased : s.mblReleased
+  const answeredDepots = DEPOTS.filter(d => depotReplies[d.id]).length
+
+  const kycBadge: { variant: BadgeVariant; label: string } =
+    kycStatus === 'approved' ? { variant: 'approved', label: 'KYC Approved' }
+    : kycStatus === 'rejected' ? { variant: 'rejected', label: 'KYC Rejected' }
+    : kycStatus === 'submitted' ? { variant: 'pending', label: 'KYC Submitted' }
+    : { variant: 'inactive', label: 'KYC Not Started' }
+
+  const blBadge: { variant: BadgeVariant; label: string } =
+    blStatus === 'approved' ? { variant: 'approved', label: 'BL Approved' }
+    : blStatus === 'changes-requested' ? { variant: 'countered', label: 'Changes Requested' }
+    : blStatus === 'drafted' ? { variant: 'pending', label: 'BL Drafted' }
+    : { variant: 'inactive', label: 'No BL Yet' }
 
   return (
     <div className="max-w-2xl">
@@ -59,6 +95,84 @@ export default function OrderTimeline({ id, onNavigate }: { id: string; onNaviga
           </div>
         ))}
       </div>
+
+      {/* Depot & CRO */}
+      <SectionCard title="Depot & CRO">
+        {!requirementSent ? (
+          <p className="text-[12px]" style={{ color: C.textMuted }}>Requirement not sent to depots yet.</p>
+        ) : (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <Badge variant={depotId ? 'approved' : 'pending'} label={depotId ? getDepot(depotId)?.name ?? 'Depot assigned' : `${answeredDepots}/${DEPOTS.length} replied`} />
+              {foodGrade && <Badge variant="pending" label="Food Grade" />}
+            </div>
+            {croId && <span className="text-[12px]" style={{ color: C.textMuted }}>CRO <MonoRef>{croId}</MonoRef></span>}
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Container tracking */}
+      {containersExpected.length > 0 && (
+        <SectionCard title={`Container Tracking — ${containers.length} of ${containersExpected.length} recorded`}>
+          <div className="space-y-2">
+            {containersExpected.map(num => {
+              const c = containers.find(c => c.number === num)
+              return (
+                <div key={num} className="flex items-center justify-between px-4 py-2.5" style={{ background: '#1c1e26', border: `1px solid ${C.border}`, borderRadius: 6 }}>
+                  <MonoRef>{num}</MonoRef>
+                  <div className="flex items-center gap-2">
+                    {foodGrade && (
+                      <Badge variant={c?.cleanCertified ? 'approved' : 'pending'} label={c?.cleanCertified ? 'Clean' : 'Not Certified'} />
+                    )}
+                    <Badge
+                      variant={c?.sob ? 'approved' : c?.gatedIn ? 'pending' : c ? 'sent' : 'inactive'}
+                      label={c?.sob ? 'On Board' : c?.gatedIn ? 'Gated In' : c ? 'Handed Over' : 'Not Handed Over'}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Documents & payment */}
+      <SectionCard title="Documents & Payment">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-medium mb-1" style={{ color: C.textMuted }}>KYC</div>
+            <Badge variant={kycBadge.variant} label={kycBadge.label} />
+            {kycStatus === 'rejected' && kycRejectionReason && (
+              <div className="text-[11px] mt-1" style={{ color: C.textMuted }}>{kycRejectionReason}</div>
+            )}
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-medium mb-1" style={{ color: C.textMuted }}>Bill of Lading</div>
+            <div className="flex items-center gap-2">
+              <Badge variant={blBadge.variant} label={blBadge.label} />
+              {mblType && <Badge variant="inactive" label={mblType === 'surrender' ? 'Surrender' : 'Original'} />}
+            </div>
+            {blStatus === 'changes-requested' && blChangeNote && (
+              <div className="text-[11px] mt-1" style={{ color: C.textMuted }}>{blChangeNote}</div>
+            )}
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-medium mb-1" style={{ color: C.textMuted }}>Invoice</div>
+            <Badge variant={invoiceReleased ? 'active' : 'inactive'} label={invoiceReleased ? 'Released' : 'Not Released'} />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-medium mb-1" style={{ color: C.textMuted }}>Payment</div>
+            <Badge
+              variant={paymentStatus === 'paid' || paymentStatus === 'standing-credit' ? 'paid' : 'pending'}
+              label={hasStandingCredit ? 'Standing Credit' : paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+            />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-medium mb-1" style={{ color: C.textMuted }}>Master BL</div>
+            <Badge variant={mblReleased ? 'active' : 'inactive'} label={mblReleased ? 'Released' : 'Not Released'} />
+          </div>
+        </div>
+      </SectionCard>
 
       {/* Timeline */}
       <div style={{ background: '#15171d', border: `1px solid ${C.border}`, borderRadius: 8 }} className="p-6">

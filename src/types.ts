@@ -7,6 +7,7 @@ export type Screen =
   | 'booking-list' | 'ops-accept' | 'booking-confirmed' | 'select-sailing'
   | 'ops-depot-select'
   | 'depot-requirement' | 'depot-handover' | 'container-tracking'
+  | 'depot-queue' | 'depot-case-detail'
   | 'cro-release' | 'order-list' | 'order-timeline'
   | 'shipping-instructions' | 'gate-in' | 'load-vessel' | 'bl-draft' | 'invoice' | 'mbl-release'
   | 'trade-queue'

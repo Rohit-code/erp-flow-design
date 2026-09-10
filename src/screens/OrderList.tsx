@@ -9,16 +9,17 @@ const VARIANT_BADGE: Record<string, 'active' | 'in-progress' | 'cancelled'> = {
   cancelled: 'cancelled',
 }
 
-export default function OrderList({ onOpen }: { onOpen: (id: string) => void }) {
+export default function OrderList({ onOpen, filterCustomer }: { onOpen: (id: string) => void; filterCustomer?: string }) {
   // This prototype's booking writes its own history, so its row reports live.
   const { statusLabel, latestEvent, booking } = useBooking()
+  const rows = filterCustomer ? ORDERS.filter(o => o.customer === filterCustomer) : ORDERS
 
   return (
     <div className="max-w-4xl">
       <PageHeader
         breadcrumb="Booking Pipeline"
-        title="Order Timeline"
-        subtitle="Full audit trail per booking — inquiry through CRO (and beyond)."
+        title={filterCustomer ? 'Order History' : 'Order Timeline'}
+        subtitle={filterCustomer ? `Every booking on record for ${filterCustomer}.` : 'Full audit trail per booking — inquiry through CRO (and beyond).'}
       />
 
       <div style={{ background: '#15171d', border: `1px solid ${C.border}`, borderRadius: 8 }} className="overflow-hidden mb-4">
@@ -31,7 +32,7 @@ export default function OrderList({ onOpen }: { onOpen: (id: string) => void }) 
             </tr>
           </thead>
           <tbody>
-            {ORDERS.map(row => {
+            {rows.map(row => {
               const isLive = row.id === BOOKING.id
               const latest = isLive && latestEvent ? latestEvent : row.timeline[row.timeline.length - 1]
               return (

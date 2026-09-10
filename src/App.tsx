@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Screen, Role, Session } from './types'
 import { DEMO_USERS, ROLE_LANDING, isScreenAllowed } from './auth'
 import { useBooking } from './state/BookingContext'
+import { BOOKING } from './data/booking'
 import ERPShell from './components/ERPShell'
 import PortalShell from './components/PortalShell'
 import DepotShell from './components/DepotShell'
@@ -35,6 +36,8 @@ import TradeQueue from './screens/TradeQueue'
 import OpsDepotSelect from './screens/OpsDepotSelect'
 import DepotRequirement from './screens/DepotRequirement'
 import DepotHandover from './screens/DepotHandover'
+import DepotQueue from './screens/DepotQueue'
+import DepotCaseDetail from './screens/DepotCaseDetail'
 import ContainerTracking from './screens/ContainerTracking'
 import ShippingInstructions from './screens/ShippingInstructions'
 import GateIn from './screens/GateIn'
@@ -50,6 +53,7 @@ export default function App() {
   const [selectedInquiryId, setSelectedInquiryId] = useState('INQ-2024-0391')
   const [selectedQuoteId, setSelectedQuoteId] = useState('QT-2024-0217')
   const [selectedOrderId, setSelectedOrderId] = useState('BKG-2024-00142')
+  const [selectedCaseId, setSelectedCaseId] = useState('BKG-2024-00135')
 
   // A customer who has already opened their magic link should land in the
   // portal, not back on the registration page.
@@ -79,6 +83,11 @@ export default function App() {
   const openInquiry = (id: string) => { setSelectedInquiryId(id); navigate('inquiry-detail') }
   const openQuote = (id: string) => { setSelectedQuoteId(id); navigate('quotation') }
   const openOrder = (id: string) => { setSelectedOrderId(id); navigate('order-timeline') }
+  const openCase = (id: string) => {
+    if (id === BOOKING.id) { navigate('depot-requirement'); return }
+    setSelectedCaseId(id)
+    navigate('depot-case-detail')
+  }
 
   const renderScreen = () => {
     switch (activeScreen) {
@@ -99,9 +108,11 @@ export default function App() {
       case 'ops-depot-select':     return <OpsDepotSelect session={session} onNavigate={navigate} />
       case 'depot-requirement':    return <DepotRequirement session={session} onNavigate={navigate} />
       case 'depot-handover':       return <DepotHandover session={session} onNavigate={navigate} />
+      case 'depot-queue':          return <DepotQueue onOpen={openCase} />
+      case 'depot-case-detail':    return <DepotCaseDetail id={selectedCaseId} onNavigate={navigate} />
       case 'container-tracking':   return <ContainerTracking role={role} onNavigate={navigate} />
       case 'cro-release':          return <CRORelease role={role} onNavigate={navigate} />
-      case 'order-list':           return <OrderList onOpen={openOrder} />
+      case 'order-list':           return <OrderList onOpen={openOrder} filterCustomer={role === 'customer' ? BOOKING.customer : undefined} />
       case 'order-timeline':       return <OrderTimeline id={selectedOrderId} onNavigate={navigate} />
       case 'shipping-instructions':return <ShippingInstructions session={session} onNavigate={navigate} />
       case 'gate-in':              return <GateIn session={session} onNavigate={navigate} />
