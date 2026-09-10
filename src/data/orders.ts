@@ -32,6 +32,8 @@ export type CaseContainer = {
 }
 
 export type CaseSnapshot = {
+  /** The rate the customer accepted — null if a rate was never agreed. */
+  agreedRate: number | null
   foodGrade: boolean
   requirementSent: boolean
   depotReplies: Record<string, 'pending' | 'yes' | 'no'>
@@ -96,6 +98,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'yes', 'dep-3': 'yes' },
       depotId: 'dep-2',
+      agreedRate: 485,
       containersExpected: ['MSCU3841290', 'MSCU4012876'],
       containers: [],
       croId: 'CRO-2024-0089',
@@ -131,6 +134,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: false,
       depotReplies: {},
       depotId: null,
+      agreedRate: 1340,
       containersExpected: ['MSCU4477201'],
       containers: [],
       croId: null,
@@ -165,6 +169,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: false,
       depotReplies: {},
       depotId: null,
+      agreedRate: null,
       containersExpected: [],
       containers: [],
       croId: null,
@@ -204,6 +209,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'no', 'dep-3': 'yes' },
       depotId: 'dep-3',
+      agreedRate: 1180,
       containersExpected: ['RFCU5512034', 'RFCU5512041'],
       containers: [],
       croId: 'CRO-2024-0091',
@@ -243,6 +249,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'yes', 'dep-2': 'no', 'dep-3': 'no' },
       depotId: 'dep-1',
+      agreedRate: 910,
       containersExpected: ['REFU2201884', 'REFU2201891'],
       containers: [
         { number: 'REFU2201884', status: 'depot-out', gatedIn: true, sob: true, sobDate: '11 Nov 2024', cleanCertified: true, cleanCertifiedBy: 'Depot Desk' },
@@ -285,6 +292,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'yes', 'dep-2': 'yes', 'dep-3': 'no' },
       depotId: 'dep-1',
+      agreedRate: 640,
       containersExpected: ['TCLU9012345', 'TCLU9012346', 'TCLU9012347', 'TCLU9012348'],
       containers: [
         { number: 'TCLU9012345', status: 'depot-out', gatedIn: true, sob: false, sobDate: null, cleanCertified: false, cleanCertifiedBy: null },
@@ -329,6 +337,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'yes', 'dep-3': 'no' },
       depotId: 'dep-2',
+      agreedRate: 1410,
       containersExpected: ['MSCU7719002'],
       containers: [
         { number: 'MSCU7719002', status: 'depot-out', gatedIn: true, sob: true, sobDate: '04 Nov 2024', cleanCertified: false, cleanCertifiedBy: null },
@@ -369,6 +378,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'no', 'dep-3': 'yes' },
       depotId: 'dep-3',
+      agreedRate: 380,
       containersExpected: ['TGHU4402210', 'TGHU4402211'],
       containers: [
         { number: 'TGHU4402210', status: 'depot-out', gatedIn: true, sob: true, sobDate: '12 Nov 2024', cleanCertified: false, cleanCertifiedBy: null },
@@ -411,6 +421,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'yes', 'dep-2': 'no', 'dep-3': 'no' },
       depotId: 'dep-1',
+      agreedRate: 705,
       containersExpected: ['TCNU8834410', 'TCNU8834411', 'TCNU8834412'],
       containers: [
         { number: 'TCNU8834410', status: 'depot-out', gatedIn: true, sob: true, sobDate: '10 Nov 2024', cleanCertified: false, cleanCertifiedBy: null },
@@ -449,6 +460,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: false,
       depotReplies: {},
       depotId: null,
+      agreedRate: 890,
       containersExpected: ['MSCU2290871'],
       containers: [],
       croId: null,
@@ -486,6 +498,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'no', 'dep-3': 'yes' },
       depotId: 'dep-3',
+      agreedRate: 1520,
       containersExpected: ['CAIU6603312', 'CAIU6603313'],
       containers: [
         { number: 'CAIU6603312', status: 'depot-out', gatedIn: true, sob: true, sobDate: '07 Nov 2024', cleanCertified: false, cleanCertifiedBy: null },
@@ -528,6 +541,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: true,
       depotReplies: { 'dep-1': 'no', 'dep-2': 'yes', 'dep-3': 'no' },
       depotId: 'dep-2',
+      agreedRate: 470,
       containersExpected: ['MSCU1180234'],
       containers: [
         { number: 'MSCU1180234', status: 'depot-out', gatedIn: true, sob: true, sobDate: '06 Oct 2024', cleanCertified: false, cleanCertifiedBy: null },
@@ -562,6 +576,7 @@ export const ORDERS: OrderRecord[] = [
       requirementSent: false,
       depotReplies: {},
       depotId: null,
+      agreedRate: null,
       containersExpected: [],
       containers: [],
       croId: null,

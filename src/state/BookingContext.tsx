@@ -148,7 +148,7 @@ const INITIAL: BookingState = {
       actor: 'Regnus AI',
       role: 'System',
       ts: '14 Nov 2024 · 09:41 IST',
-      note: 'Extraction confidence 94% · BLUE — ask of USD 500 clears the USD 493 floor, within Sales authority',
+      note: 'Extraction confidence 94% — pricing reviewed automatically and routed to Sales.',
       icon: '⬡',
     },
   ],

@@ -215,7 +215,7 @@ export default function Home({ role, onNavigate }: { role: Role; onNavigate: (s:
           <path d="M7 6.2v4M7 4.2v.6" stroke="#93c5fd" strokeWidth="1.3" strokeLinecap="round"/>
         </svg>
         <span style={{ fontSize: 12, color: '#93c5fd' }}>
-          <strong>{builtCount} of {allItems.length} services are built in this prototype</strong> — the export booking
+          <strong>{builtCount} of {allItems.length} services are live in this build</strong> — the export booking
           flow, end to end. Everything marked <em>Planned</em> is scope, not working software.
         </span>
       </div>

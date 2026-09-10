@@ -38,6 +38,8 @@ import DepotRequirement from './screens/DepotRequirement'
 import DepotHandover from './screens/DepotHandover'
 import DepotQueue from './screens/DepotQueue'
 import DepotCaseDetail from './screens/DepotCaseDetail'
+import CaseList, { Stage } from './screens/CaseList'
+import StageCaseDetail from './screens/StageCaseDetail'
 import ContainerTracking from './screens/ContainerTracking'
 import ShippingInstructions from './screens/ShippingInstructions'
 import GateIn from './screens/GateIn'
@@ -54,6 +56,7 @@ export default function App() {
   const [selectedQuoteId, setSelectedQuoteId] = useState('QT-2024-0217')
   const [selectedOrderId, setSelectedOrderId] = useState('BKG-2024-00142')
   const [selectedCaseId, setSelectedCaseId] = useState('BKG-2024-00135')
+  const [selectedCaseStage, setSelectedCaseStage] = useState<Stage>('ops-accept')
 
   // A customer who has already opened their magic link should land in the
   // portal, not back on the registration page.
@@ -88,6 +91,12 @@ export default function App() {
     setSelectedCaseId(id)
     navigate('depot-case-detail')
   }
+  const openStageCase = (stage: Stage, id: string) => {
+    if (id === BOOKING.id) { navigate(stage); return }
+    setSelectedCaseStage(stage)
+    setSelectedCaseId(id)
+    navigate('stage-case-detail')
+  }
 
   const renderScreen = () => {
     switch (activeScreen) {
@@ -112,6 +121,15 @@ export default function App() {
       case 'depot-case-detail':    return <DepotCaseDetail id={selectedCaseId} onNavigate={navigate} />
       case 'container-tracking':   return <ContainerTracking role={role} onNavigate={navigate} />
       case 'cro-release':          return <CRORelease role={role} onNavigate={navigate} />
+      case 'ops-accept-list':          return <CaseList stage="ops-accept" onOpen={id => openStageCase('ops-accept', id)} />
+      case 'cro-list':                 return <CaseList stage="cro-release" onOpen={id => openStageCase('cro-release', id)} />
+      case 'container-tracking-list': return <CaseList stage="container-tracking" onOpen={id => openStageCase('container-tracking', id)} />
+      case 'gate-in-list':             return <CaseList stage="gate-in" onOpen={id => openStageCase('gate-in', id)} />
+      case 'load-vessel-list':         return <CaseList stage="load-vessel" onOpen={id => openStageCase('load-vessel', id)} />
+      case 'bl-draft-list':            return <CaseList stage="bl-draft" onOpen={id => openStageCase('bl-draft', id)} />
+      case 'invoice-list':             return <CaseList stage="invoice" onOpen={id => openStageCase('invoice', id)} />
+      case 'mbl-release-list':         return <CaseList stage="mbl-release" onOpen={id => openStageCase('mbl-release', id)} />
+      case 'stage-case-detail':        return <StageCaseDetail stage={selectedCaseStage} id={selectedCaseId} onNavigate={navigate} />
       case 'order-list':           return <OrderList onOpen={openOrder} filterCustomer={role === 'customer' ? BOOKING.customer : undefined} />
       case 'order-timeline':       return <OrderTimeline id={selectedOrderId} onNavigate={navigate} />
       case 'shipping-instructions':return <ShippingInstructions session={session} onNavigate={navigate} />

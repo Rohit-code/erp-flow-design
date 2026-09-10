@@ -10,6 +10,8 @@ export type Screen =
   | 'depot-queue' | 'depot-case-detail'
   | 'cro-release' | 'order-list' | 'order-timeline'
   | 'shipping-instructions' | 'gate-in' | 'load-vessel' | 'bl-draft' | 'invoice' | 'mbl-release'
+  | 'ops-accept-list' | 'cro-list' | 'container-tracking-list' | 'gate-in-list'
+  | 'load-vessel-list' | 'bl-draft-list' | 'invoice-list' | 'mbl-release-list' | 'stage-case-detail'
   | 'trade-queue'
   | 'iam-dashboard' | 'iam-users' | 'iam-groups' | 'iam-policies' | 'iam-permissions' | 'iam-audit'
   | 'org-hierarchy'

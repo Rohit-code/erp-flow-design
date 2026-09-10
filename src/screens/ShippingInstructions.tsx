@@ -32,6 +32,7 @@ export default function ShippingInstructions({ session, onNavigate }: { session:
     ? `${BOOKING.customer} — ${dispatch[0]!.line1}, ${dispatch[0]!.city} ${dispatch[0]!.pin}, ${dispatch[0]!.country}`
     : BOOKING.customer
   const [consignee, setConsignee] = useState('Shanghai Huaxin Trading Co., Ltd, Pudong, Shanghai, China')
+  const [consigneeSaved, setConsigneeSaved] = useState(false)
   const [notifyParty, setNotifyParty] = useState('Shanghai Huaxin Trading Co., Ltd, Pudong, Shanghai, China')
 
   const [vessel, setVessel] = useState(sailing ? `${sailing.vessel} / ${sailing.voyage}` : '')
@@ -242,8 +243,13 @@ export default function ShippingInstructions({ session, onNavigate }: { session:
       <SectionCard
         title="Where these addresses came from"
         action={
-          <button className={cls.btnSecondary} style={{ fontSize: 12, padding: '4px 10px' }}>
-            <Icon.plus /> Save consignee for reuse
+          <button
+            onClick={() => setConsigneeSaved(true)}
+            disabled={consigneeSaved}
+            className={cls.btnSecondary}
+            style={{ fontSize: 12, padding: '4px 10px', opacity: consigneeSaved ? 0.6 : 1 }}
+          >
+            {consigneeSaved ? <><Icon.check /> Saved for reuse</> : <><Icon.plus /> Save consignee for reuse</>}
           </button>
         }
       >

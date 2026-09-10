@@ -15,13 +15,30 @@ export default function DepotRequirement({ session, onNavigate }: { session: Ses
   if (!booking.requirementSent) {
     return (
       <div className="max-w-2xl">
-        <PageHeader title="Requirement Inbox" subtitle="Booking requests asking whether this depot has the required containers" />
+        <PageHeader
+          title="Requirement Inbox"
+          subtitle="Booking requests asking whether this depot has the required containers"
+          actions={<Badge variant="awaiting" label="Nothing waiting" />}
+        />
         <SectionCard>
-          <p className="text-[13px]" style={{ color: C.textMuted }}>
-            Nothing waiting. Requirements appear here once Ops sends one out for a booking — they go to every candidate
-            depot at the port at the same time.
+          <p className="text-[13px] mb-3" style={{ color: C.text }}>
+            <MonoRef>{BOOKING.id}</MonoRef> — the live demo booking — hasn't reached this step yet.
+          </p>
+          <p className="text-[12px]" style={{ color: C.textMuted }}>
+            A requirement only lands here after Sales/Trade agree a rate with the customer and Ops sends the container
+            requirement out to every candidate depot at the port. Right now that hasn't happened for the live booking, so
+            there's nothing to answer — this isn't a bug, it's this booking's actual state.
           </p>
         </SectionCard>
+        <div style={{ background: C.blue.bg, border: `1px solid ${C.blue.border}`, borderRadius: 6 }} className="flex items-center justify-between px-4 py-3.5">
+          <span className="text-[12px]" style={{ color: C.blue.text }}>
+            Want to see requirement, food-grade and handover status for real bookings instead? Every case this desk has
+            touched is in the Case Queue.
+          </span>
+          <button onClick={() => onNavigate('depot-queue')} className={cls.btnPrimary} style={{ flexShrink: 0 }}>
+            Case Queue →
+          </button>
+        </div>
       </div>
     )
   }

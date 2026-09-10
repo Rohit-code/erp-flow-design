@@ -104,12 +104,14 @@ export default function Invoice({ role, session, onNavigate }: { role: Role; ses
         </div>
       </SectionCard>
 
-      <div style={{ background: C.amber.bg, border: `1px solid ${C.amber.border}`, borderRadius: 6 }} className="flex items-start gap-3 px-4 py-3 mb-5">
-        <span style={{ color: C.amber.text, marginTop: 1 }}><Icon.warning /></span>
-        <div className="text-[12px]" style={{ color: C.amber.text }}>
-          Payment reconciliation path — link vs. bank transfer — is not finalized yet. This is an acknowledged open gap, not a bug.
+      {!isCustomer && (
+        <div style={{ background: C.amber.bg, border: `1px solid ${C.amber.border}`, borderRadius: 6 }} className="flex items-start gap-3 px-4 py-3 mb-5">
+          <span style={{ color: C.amber.text, marginTop: 1 }}><Icon.warning /></span>
+          <div className="text-[12px]" style={{ color: C.amber.text }}>
+            Payment reconciliation path — link vs. bank transfer — is not finalized yet. This is an acknowledged open gap, not a bug.
+          </div>
         </div>
-      </div>
+      )}
 
       {!isCustomer && !released && (
         <div className="flex items-center gap-3 pt-1 mb-5">
@@ -150,7 +152,7 @@ export default function Invoice({ role, session, onNavigate }: { role: Role; ses
         <SectionCard title="Payment">
           <div className="grid grid-cols-2 gap-3">
             <button disabled className={cls.btnSecondary} style={{ opacity: 0.5, cursor: 'not-allowed', justifyContent: 'center' }}>
-              Pay via Link — gateway not wired yet
+              Pay via Link — coming soon
             </button>
             {!showBankTransfer ? (
               <button onClick={() => setShowBankTransfer(true)} className={cls.btnPrimary} style={{ justifyContent: 'center' }}>

@@ -16,6 +16,17 @@ export default function CRORelease({ role, onNavigate }: { role: Role; onNavigat
   const [showAmend, setShowAmend] = useState(false)
   const [reason, setReason] = useState('Container count changed')
   const [newDepot, setNewDepot] = useState('')
+  const [downloaded, setDownloaded] = useState(false)
+  const [resent, setResent] = useState<'depot' | 'customer' | null>(null)
+
+  const handleDownload = () => {
+    setDownloaded(true)
+    setTimeout(() => setDownloaded(false), 2000)
+  }
+  const handleResend = (target: 'depot' | 'customer') => {
+    setResent(target)
+    setTimeout(() => setResent(null), 2000)
+  }
   const history = booking.croHistory
   const current = history[history.length - 1]
   const superseded = history.filter(c => c.supersededBy)
@@ -64,8 +75,8 @@ export default function CRORelease({ role, onNavigate }: { role: Role; onNavigat
         actions={
           <div className="flex items-center gap-2">
             <Badge variant="active" label="Released" />
-            <button className={cls.btnPrimary}>
-              <Icon.download /> Download PDF
+            <button onClick={handleDownload} className={cls.btnPrimary}>
+              {downloaded ? <><Icon.check /> Downloaded</> : <><Icon.download /> Download PDF</>}
             </button>
           </div>
         }
@@ -125,8 +136,8 @@ export default function CRORelease({ role, onNavigate }: { role: Role; onNavigat
                 <svg width="18" height="18" viewBox="0 0 14 14" fill="none"><path d="M2 9l2.5-6 2.5 4 2-2.5L11 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
               <div>
-                <div className="text-[13px] font-bold text-[#dde1ea]">Apex Logistics Private Limited</div>
-                <div className="text-[11px]" style={{ color: C.textMuted }}>NVOCC · IEC AAACL1234M · Mumbai</div>
+                <div className="text-[13px] font-bold text-[#dde1ea]">Maxicon Container Line</div>
+                <div className="text-[11px]" style={{ color: C.textMuted }}>NVOCC · IEC AAACM5678K · Mumbai</div>
               </div>
             </div>
             <div className="text-right">
@@ -140,15 +151,15 @@ export default function CRORelease({ role, onNavigate }: { role: Role; onNavigat
           {/* Booking info grid */}
           <div className="grid grid-cols-3 gap-x-8 gap-y-4 mb-6">
             {[
-              { label: 'Booking Ref', value: 'BKG-2024-00142', mono: true },
+              { label: 'Booking Ref', value: BOOKING.id, mono: true },
               { label: 'Issue Date', value: '15 Nov 2024', mono: false },
               { label: 'Validity', value: '20 Nov 2024 (5 days)', mono: false },
               { label: 'Shipper', value: BOOKING.customer, mono: false },
-              { label: 'Port of Load', value: 'INNSA — Nhava Sheva', mono: false },
-              { label: 'Port of Discharge', value: 'CNSHA — Shanghai', mono: false },
+              { label: 'Port of Load', value: `${BOOKING.pol} — ${BOOKING.polName}`, mono: false },
+              { label: 'Port of Discharge', value: `${BOOKING.pod} — ${BOOKING.podName}`, mono: false },
               { label: 'Vessel / Voyage', value: sailing ? `${sailing.vessel} / ${sailing.voyage}` : '—', mono: false },
-              { label: 'ETD', value: '22 Nov 2024', mono: false },
-              { label: 'SI Cutoff', value: '20 Nov 2024, 18:00', mono: false },
+              { label: 'ETD', value: sailing?.etd ?? BOOKING.etd, mono: false },
+              { label: 'SI Cutoff', value: sailing?.cutoff ?? '20 Nov 2024, 18:00', mono: false },
             ].map(f => (
               <div key={f.label}>
                 <div className="text-[10px] uppercase tracking-widest font-medium mb-0.5" style={{ color: C.textMuted }}>{f.label}</div>
@@ -291,11 +302,17 @@ export default function CRORelease({ role, onNavigate }: { role: Role; onNavigat
 
       {/* Actions — Ops can re-send either copy; Customer only ever downloads their own */}
       <div className="flex gap-2">
-        <button className={cls.btnPrimary}><Icon.download /> Download PDF</button>
+        <button onClick={handleDownload} className={cls.btnPrimary}>
+          {downloaded ? <><Icon.check /> Downloaded</> : <><Icon.download /> Download PDF</>}
+        </button>
         {role === 'ops' && (
           <>
-            <button className={cls.btnSecondary}><Icon.mail /> Re-send to Depot</button>
-            <button className={cls.btnSecondary}><Icon.mail /> Re-send to Customer</button>
+            <button onClick={() => handleResend('depot')} className={cls.btnSecondary}>
+              {resent === 'depot' ? <><Icon.check /> Sent</> : <><Icon.mail /> Re-send to Depot</>}
+            </button>
+            <button onClick={() => handleResend('customer')} className={cls.btnSecondary}>
+              {resent === 'customer' ? <><Icon.check /> Sent</> : <><Icon.mail /> Re-send to Customer</>}
+            </button>
             {!showAmend && (
               <button onClick={() => setShowAmend(true)} className={cls.btnAmber}>Amend (supersede)</button>
             )}

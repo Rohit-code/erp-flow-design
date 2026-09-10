@@ -53,7 +53,7 @@ export default function Login({ onLogin }: { onLogin: (role: Role) => void }) {
 
         <div className="flex flex-col items-center gap-2.5 mt-6">
           <div className="text-[11px]" style={{ color: '#3d4456' }}>
-            Prototype login — click a role tile to sign in. No password required.
+            Choose a role to sign in — no password required for this walkthrough.
           </div>
           {progressed && (
             <button

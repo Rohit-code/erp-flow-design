@@ -14,19 +14,23 @@ export default function OrderList({ onOpen, filterCustomer }: { onOpen: (id: str
   const { statusLabel, latestEvent, booking } = useBooking()
   const rows = filterCustomer ? ORDERS.filter(o => o.customer === filterCustomer) : ORDERS
 
+  const headers = filterCustomer
+    ? ['Booking', 'Route', 'Equipment', 'Latest Update', 'Status', '']
+    : ['Booking', 'Customer', 'Route', 'Latest Event', 'Status', '']
+
   return (
     <div className="max-w-4xl">
       <PageHeader
-        breadcrumb="Booking Pipeline"
+        breadcrumb={filterCustomer ? 'Your Account' : 'Booking Pipeline'}
         title={filterCustomer ? 'Order History' : 'Order Timeline'}
-        subtitle={filterCustomer ? `Every booking on record for ${filterCustomer}.` : 'Full audit trail per booking — inquiry through CRO (and beyond).'}
+        subtitle={filterCustomer ? 'Every shipment booked under your account, past and present.' : 'Full audit trail per booking — inquiry through CRO (and beyond).'}
       />
 
       <div style={{ background: '#15171d', border: `1px solid ${C.border}`, borderRadius: 8 }} className="overflow-hidden mb-4">
         <table className="w-full" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-              {['Booking', 'Customer', 'Route', 'Latest Event', 'Status', ''].map(h => (
+              {headers.map(h => (
                 <th key={h} className={cls.tableHeader} style={{ textAlign: 'left' }}>{h}</th>
               ))}
             </tr>
@@ -40,12 +44,13 @@ export default function OrderList({ onOpen, filterCustomer }: { onOpen: (id: str
                   <td className={cls.tableCell}>
                     <MonoRef>{row.id}</MonoRef>
                   </td>
-                  <td className={cls.tableCell + ' font-medium'}>{row.customer}</td>
+                  {!filterCustomer && <td className={cls.tableCell + ' font-medium'}>{row.customer}</td>}
                   <td className={cls.tableCell}>
                     <span className="font-mono text-[12px]" style={{ color: C.textMuted }}>{row.pol}</span>
                     <span style={{ color: C.textMuted }}> → </span>
                     <span className="font-mono text-[12px]" style={{ color: C.textMuted }}>{row.pod}</span>
                   </td>
+                  {filterCustomer && <td className={cls.tableCell} style={{ color: C.textMuted }}>{row.equipment}</td>}
                   <td className={cls.tableCell} style={{ color: C.textMuted }}>{latest.label}</td>
                   <td className={cls.tableCell}>
                     <Badge

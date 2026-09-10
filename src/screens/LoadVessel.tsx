@@ -23,7 +23,7 @@ export default function LoadVessel({ session, onNavigate }: { session: Session; 
   if (containers.length === 0) {
     return (
       <div className="max-w-2xl">
-        <PageHeader title="Load Vessel" subtitle="Record shipped-on-board against the vessel" />
+        <PageHeader breadcrumb={`Bookings / ${BOOKING.id}`} title="Load Vessel" subtitle={`${BOOKING.id} · ${BOOKING.customer} — record shipped-on-board against the vessel`} />
         <SectionCard>
           <p className="text-[13px]" style={{ color: C.textMuted }}>
             No containers on this booking yet. They appear once the depot has handed them over and Ops has recorded gate-in
@@ -37,8 +37,9 @@ export default function LoadVessel({ session, onNavigate }: { session: Session; 
   return (
     <div className="max-w-2xl">
       <PageHeader
+        breadcrumb={`Bookings / ${BOOKING.id}`}
         title="Load Vessel"
-        subtitle={sailing ? `${sailing.vessel} · Voyage ${sailing.voyage} · ETD ${sailing.etd}` : 'No vessel selected yet'}
+        subtitle={sailing ? `${BOOKING.id} · ${sailing.vessel} · Voyage ${sailing.voyage} · ETD ${sailing.etd}` : `${BOOKING.id} · No vessel selected yet`}
         actions={
           <Badge
             variant={allLoaded ? 'approved' : loaded.length ? 'pending' : 'awaiting'}

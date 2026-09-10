@@ -109,7 +109,7 @@ export default function KYCForm({ session, onNavigate }: { session: Session; onN
           className={cls.btnSecondary}
           style={{ fontSize: 11, padding: '4px 9px', flexShrink: 0 }}
         >
-          Simulate: {mode === 'existing' ? 'new' : 'returning'} customer
+          Preview: {mode === 'existing' ? 'new' : 'returning'} customer view
         </button>
       </div>
 

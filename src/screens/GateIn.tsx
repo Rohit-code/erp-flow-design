@@ -15,8 +15,10 @@ export default function GateIn({ session, onNavigate }: { session: Session; onNa
   return (
     <div className="max-w-2xl">
       <PageHeader
+        breadcrumb={`Bookings / ${BOOKING.id}`}
         title="Gate In"
-        subtitle="Container must reach the terminal inside the port's own cutoff window before the vessel."
+        subtitle={`${BOOKING.id} · ${BOOKING.customer} · ${BOOKING.pol} → ${BOOKING.pod} — container must reach the terminal inside the port's own cutoff window.`}
+        actions={<Badge variant={allConfirmed ? 'approved' : 'awaiting'} label={allConfirmed ? 'All Gated In' : `${CONTAINERS.filter(c => c.gatedIn).length} of ${CONTAINERS.length} gated in`} />}
       />
 
       <SectionCard title="Cutoff Window">
